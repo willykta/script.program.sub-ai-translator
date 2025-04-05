@@ -1,0 +1,7 @@
+<settings>
+    <category label="Ustawienia tłumaczenia">
+        <setting id="target_lang" type="text" label="Język docelowy (np. PL)" default="PL" />
+        <setting id="use_mock" type="bool" label="Użyj mockowego API (testowe)" default="true" />
+        <setting id="api_key" type="text" label="Klucz API OpenAI" default="" />
+    </category>
+</settings>
