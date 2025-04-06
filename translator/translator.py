@@ -1,10 +1,4 @@
-import os
-import sys
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "lib"))
-
 import re
-import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 SRT_REGEX = r"(\d+)\s+([\d:,]+)\s+-->\s+([\d:,]+)\s+([\s\S]+?)(?=\n\n|\Z)"

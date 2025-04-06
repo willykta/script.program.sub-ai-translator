@@ -4,11 +4,10 @@ import os
 import sys
 
 addon_dir = os.path.dirname(__file__)
-sys.path.insert(0, os.path.join(addon_dir, "lib"))
 sys.path.insert(0, os.path.join(addon_dir, "translator"))
 sys.path.insert(0, os.path.join(addon_dir, "api"))
 
-import translator.translator as translator
+import translator
 import api
 
 addon = xbmcaddon.Addon()
