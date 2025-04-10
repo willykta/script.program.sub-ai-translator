@@ -1,4 +1,4 @@
-<addon id="plugin.subtitle.translator" name="Subtitle Translator" version="1.0.4" provider-name="re999">
+<addon id="plugin.subtitle.translator" name="Subtitle Translator" version="1.0.7" provider-name="re999" icon="icon.png">
 
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>

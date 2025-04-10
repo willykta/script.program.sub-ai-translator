@@ -15,29 +15,30 @@ lang = addon.getSetting("target_lang")
 use_mock = addon.getSettingBool("use_mock")
 api_key = addon.getSetting("api_key")
 model = "gpt-3.5-turbo"
+_ = addon.getLocalizedString
 
-srt_path = xbmcgui.Dialog().browse(1, "Wybierz plik SRT", "files", ".srt")
+srt_path = xbmcgui.Dialog().browse(1, _(30000), "files", ".srt")
 if not srt_path:
-    xbmcgui.Dialog().notification("Tłumaczenie napisów", "Anulowano", xbmcgui.NOTIFICATION_INFO, 3000)
+    xbmcgui.Dialog().notification(_(30000), _(30001), xbmcgui.NOTIFICATION_INFO, 3000)
     exit()
 
 est = translator.estimate_cost(srt_path, lang)
 
 if not xbmcgui.Dialog().yesno(
-    "Szacowany koszt",
-    f"Tokeny: {est['tokens']}\nKoszt: ~${est['usd']}\n\nKontynuować?"
+    _(30002),
+    _(30003).format(tokens=est["tokens"], usd=est["usd"])
 ):
-    xbmcgui.Dialog().notification("Anulowano", "Tłumaczenie przerwane", xbmcgui.NOTIFICATION_INFO, 3000)
+    xbmcgui.Dialog().notification(_(30000), _(30001), xbmcgui.NOTIFICATION_INFO, 3000)
     exit()
 
 call_fn = api.mock if use_mock else api.openai
 
 progress = xbmcgui.DialogProgress()
-progress.create("Tłumaczenie...", "Rozpoczynanie...")
+progress.create(_(30000), "…")
 
 def report_progress(idx, total):
     percent = int(100 * idx / total)
-    progress.update(percent, f"Tłumaczę: fragment {idx} z {total}")
+    progress.update(percent, f"{_(30000)}: {idx} / {total}")
 
 def check_cancelled():
     return progress.iscanceled()
@@ -53,7 +54,7 @@ try:
         check_cancelled=check_cancelled
     )
     progress.close()
-    xbmcgui.Dialog().notification("Gotowe", f"Zapisano: {os.path.basename(out_path)}", xbmcgui.NOTIFICATION_INFO, 5000)
+    xbmcgui.Dialog().notification(_(30004), _(30005).format(filename=os.path.basename(out_path)), xbmcgui.NOTIFICATION_INFO, 5000)
 except Exception as e:
     progress.close()
-    xbmcgui.Dialog().notification("Błąd", str(e), xbmcgui.NOTIFICATION_ERROR, 5000)
+    xbmcgui.Dialog().notification(_(30006), str(e), xbmcgui.NOTIFICATION_ERROR, 5000)

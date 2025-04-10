@@ -1,0 +1,31 @@
+msgid ""
+msgstr ""
+"Language: pl_PL\n"
+
+msgctxt "#30000"
+msgid "Translate subtitle file"
+msgstr "Przetłumacz plik napisów"
+
+msgctxt "#30001"
+msgid "Translation cancelled"
+msgstr "Tłumaczenie anulowano"
+
+msgctxt "#30002"
+msgid "Estimated cost"
+msgstr "Szacowany koszt"
+
+msgctxt "#30003"
+msgid "Estimated tokens: {tokens}\nEstimated cost: ~${usd}\n\nContinue?"
+msgstr "Szacowana liczba tokenów: {tokens}\nKoszt: ~${usd}\n\nKontynuować?"
+
+msgctxt "#30004"
+msgid "Translation complete"
+msgstr "Tłumaczenie zakończone"
+
+msgctxt "#30005"
+msgid "Saved to: {filename}"
+msgstr "Zapisano do: {filename}"
+
+msgctxt "#30006"
+msgid "Translation error"
+msgstr "Błąd tłumaczenia"
