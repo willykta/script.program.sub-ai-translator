@@ -21,10 +21,39 @@ if not srt_path:
     xbmcgui.Dialog().notification("Tłumaczenie napisów", "Anulowano", xbmcgui.NOTIFICATION_INFO, 3000)
     exit()
 
+est = translator.estimate_cost(srt_path, lang)
+
+if not xbmcgui.Dialog().yesno(
+    "Szacowany koszt",
+    f"Tokeny: {est['tokens']}\nKoszt: ~${est['usd']}\n\nKontynuować?"
+):
+    xbmcgui.Dialog().notification("Anulowano", "Tłumaczenie przerwane", xbmcgui.NOTIFICATION_INFO, 3000)
+    exit()
+
 call_fn = api.mock if use_mock else api.openai
 
+progress = xbmcgui.DialogProgress()
+progress.create("Tłumaczenie...", "Rozpoczynanie...")
+
+def report_progress(idx, total):
+    percent = int(100 * idx / total)
+    progress.update(percent, f"Tłumaczę: fragment {idx} z {total}")
+
+def check_cancelled():
+    return progress.iscanceled()
+
 try:
-    out_path = translator.translate_subtitles(srt_path, api_key, lang, model, call_fn)
+    out_path = translator.translate_subtitles(
+        srt_path,
+        api_key,
+        lang,
+        model,
+        call_fn,
+        report_progress=report_progress,
+        check_cancelled=check_cancelled
+    )
+    progress.close()
     xbmcgui.Dialog().notification("Gotowe", f"Zapisano: {os.path.basename(out_path)}", xbmcgui.NOTIFICATION_INFO, 5000)
 except Exception as e:
+    progress.close()
     xbmcgui.Dialog().notification("Błąd", str(e), xbmcgui.NOTIFICATION_ERROR, 5000)

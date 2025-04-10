@@ -36,7 +36,25 @@ write_srt = lambda blocks, path: open(path, "w", encoding="utf-8").write(
     )
 )
 
-def translate_subtitles(path, api_key, lang, model, call_fn):
+estimate_cost = lambda path, lang: (
+    lambda prompts, chars, tokens: {
+        "chars": chars,
+        "tokens": tokens,
+        "usd": round(tokens / 1000 * 0.001, 4),  # $0.001 per 1K tokens
+        "prompts": prompts
+    }
+)(
+    prompts := [
+        build_prompt(["\n".join(b["lines"]) for b in batch], lang)
+        for batch in group(10, parse_srt(path))
+    ],
+    sum(len(p) for p in prompts),
+    sum(len(p) for p in prompts) // 4
+)
+
+from itertools import chain
+
+def translate_subtitles(path, api_key, lang, model, call_fn, report_progress=None, check_cancelled=None):
     blocks = parse_srt(path)
     batches = group(10, list(enumerate(blocks)))
 
@@ -46,13 +64,21 @@ def translate_subtitles(path, api_key, lang, model, call_fn):
             for batch in batches
         }
 
-        results = [
-            (i, t)
-            for future in as_completed(futures)
-            for (i, _), t in zip(futures[future], future.result())
-        ]
+        total = len(futures)
 
-    translated = sorted(results, key=lambda x: x[0])
+        def completed():
+            for idx, future in enumerate(as_completed(futures), 1):
+                if check_cancelled and check_cancelled():
+                    raise Exception("Tłumaczenie anulowane przez użytkownika.")
+                if report_progress:
+                    report_progress(idx, total)
+                yield zip((i for i, _ in futures[future]), future.result())
+
+        translated = sorted(
+            chain.from_iterable(completed()),
+            key=lambda x: x[0]
+        )
+
     merged = [
         {**blocks[i], "lines": text.split("\n")}
         for i, text in translated
@@ -61,4 +87,6 @@ def translate_subtitles(path, api_key, lang, model, call_fn):
     new_path = path.replace(".srt", f".{lang.lower()}.translated.srt")
     write_srt(merged, new_path)
     return new_path
+
+
 
