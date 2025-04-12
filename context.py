@@ -31,7 +31,8 @@ if not selected_path:
     sys.exit(1)
 
 def run_translation(srt_path):
-    xbmc.executebuiltin(f'RunScript("{os.path.join(addon_path, "service.py")}", "{srt_path}")')
+    xbmc.executebuiltin(f'RunScript(script.program.sub-ai-translator, "{srt_path}")')
+
 
 if selected_path.lower().endswith(".srt"):
     run_translation(selected_path)

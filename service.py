@@ -10,17 +10,20 @@ sys.path.insert(0, os.path.join(addon_dir, "api"))
 import translator
 import api
 
-addon = xbmcaddon.Addon()
+addon = xbmcaddon.Addon("script.program.sub-ai-translator")
 lang = addon.getSetting("target_lang")
 use_mock = addon.getSettingBool("use_mock")
 api_key = addon.getSetting("api_key")
 model = "gpt-3.5-turbo"
 _ = addon.getLocalizedString
 
-srt_path = xbmcgui.Dialog().browse(1, _(30000), "files", ".srt")
-if not srt_path:
-    xbmcgui.Dialog().notification(_(30000), _(30001), xbmcgui.NOTIFICATION_INFO, 3000)
-    exit()
+if len(sys.argv) > 1 and os.path.isfile(sys.argv[1]):
+    srt_path = sys.argv[1]
+else:
+    srt_path = xbmcgui.Dialog().browse(1, _(30000), "files", ".srt")
+    if not srt_path:
+        xbmcgui.Dialog().notification(_(30000), _(30001), xbmcgui.NOTIFICATION_INFO, 3000)
+        exit()
 
 est = translator.estimate_cost(srt_path, lang)
 
