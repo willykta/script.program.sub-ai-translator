@@ -29,3 +29,19 @@ msgstr "Zapisano do: {filename}"
 msgctxt "#30006"
 msgid "Translation error"
 msgstr "Błąd tłumaczenia"
+
+msgctxt "#30007"
+msgid "Translate subtitles"
+msgstr "Przetłumacz napisy..."
+
+msgctxt "#30008"
+msgid "No file path provided"
+msgstr "No file path provided"
+
+msgctxt "#30009"
+msgid "No .srt subtitles found"
+msgstr "Nie znaleziono napisów .srt"
+
+msgctxt "#30010"
+msgid "Choose subtitle file"
+msgstr Wybierz plik z napisami"
