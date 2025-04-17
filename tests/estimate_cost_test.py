@@ -1,10 +1,17 @@
-from core.translation import estimate_cost
+from core.estimation import estimate_cost
 from pathlib import Path
 
-def test_estimate_cost_output():
-    path = Path(__file__).parent / "data" / "sample.srt"
-    result = estimate_cost(str(path), "PL")
+TEST_DIR = Path(__file__).parent
+DATA_DIR = TEST_DIR / "data"
+SAMPLE_FILE = DATA_DIR / "sample.srt"
 
+def test_estimate_cost_output():
+    # Given: a sample subtitle file
+
+    # When: estimating cost
+    result = estimate_cost(str(SAMPLE_FILE), "PL")
+
+    # Then: result should be a valid estimation dictionary
     assert isinstance(result, dict)
     assert "chars" in result
     assert "tokens" in result

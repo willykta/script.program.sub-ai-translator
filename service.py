@@ -7,7 +7,8 @@ addon_dir = os.path.dirname(__file__)
 sys.path.insert(0, os.path.join(addon_dir, "core"))
 sys.path.insert(0, os.path.join(addon_dir, "api"))
 
-from core.translation import translate_subtitles, estimate_cost
+from core.translation import translate_subtitles
+from core.estimation import estimate_cost
 import api.mock as mock
 import api.openai as openai
 
