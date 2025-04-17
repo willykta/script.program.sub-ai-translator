@@ -2,14 +2,14 @@ import pytest
 import re
 from pathlib import Path
 from unittest.mock import patch
-from translator.translator import translate_subtitles
+from core.translation import translate_subtitles
 import sys
 import os
 
 addon_dir = os.path.dirname(__file__)
 sys.path.insert(0, os.path.join(addon_dir, "api"))
 
-from api.mock_openai import call as mock_openai
+from api.mock import call as mock_openai
 
 def fake_call_openai(prompt, model, api_key):
     blocks = re.split(r"\n\d+:\n", prompt)[1:] 

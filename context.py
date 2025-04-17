@@ -13,7 +13,6 @@ def resolve_path():
     if len(sys.argv) > 1 and os.path.isfile(sys.argv[1]):
         return sys.argv[1]
     
-    # Fallback: próbujemy wyciągnąć ścieżkę z ListItem.*
     path = xbmc.getInfoLabel("ListItem.Path")
     filename = xbmc.getInfoLabel("ListItem.FilenameAndPath") or xbmc.getInfoLabel("ListItem.Filename")
     

@@ -1,4 +1,4 @@
-<addon id="script.program.sub-ai-translator" name="Subtitle AI Translator" version="1.0.36" provider-name="re999">
+<addon id="script.program.sub-ai-translator" name="Subtitle AI Translator" version="1.0.42" provider-name="re999">
 
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -11,12 +11,12 @@
             <item library="context.py">
                 <label>30007</label>
                 <visible>true</visible>
+                <icon>resources/images/icon-small.png</icon>
                 <action>RunScript(script.program.sub-ai-translator, {ListItem.FileNameAndPath})</action>
             </item>
         </menu>
     </extension>
     
-
     <extension point="xbmc.addon.metadata">
         <summary lang="en">Translate subtitle files using AI</summary>
         <description lang="en">This addon lets you translate .srt subtitle files using OpenAI or a mock backend.</description>

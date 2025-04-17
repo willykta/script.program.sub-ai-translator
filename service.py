@@ -4,11 +4,12 @@ import os
 import sys
 
 addon_dir = os.path.dirname(__file__)
-sys.path.insert(0, os.path.join(addon_dir, "translator"))
+sys.path.insert(0, os.path.join(addon_dir, "core"))
 sys.path.insert(0, os.path.join(addon_dir, "api"))
 
-import translator
-import api
+from core.translation import translate_subtitles, estimate_cost
+import api.mock as mock
+import api.openai as openai
 
 addon = xbmcaddon.Addon("script.program.sub-ai-translator")
 lang = addon.getSetting("target_lang")
@@ -25,7 +26,7 @@ else:
         xbmcgui.Dialog().notification(_(30000), _(30001), xbmcgui.NOTIFICATION_INFO, 3000)
         exit()
 
-est = translator.estimate_cost(srt_path, lang)
+est = estimate_cost(srt_path, lang)
 
 if not xbmcgui.Dialog().yesno(
     _(30002),
@@ -34,7 +35,7 @@ if not xbmcgui.Dialog().yesno(
     xbmcgui.Dialog().notification(_(30000), _(30001), xbmcgui.NOTIFICATION_INFO, 3000)
     exit()
 
-call_fn = api.mock if use_mock else api.openai
+call_fn = mock if use_mock else openai
 
 progress = xbmcgui.DialogProgress()
 progress.create(_(30000), "…")
@@ -47,7 +48,7 @@ def check_cancelled():
     return progress.iscanceled()
 
 try:
-    out_path = translator.translate_subtitles(
+    out_path = translate_subtitles(
         srt_path,
         api_key,
         lang,

@@ -1,4 +1,4 @@
-from translator.translator import estimate_cost
+from core.translation import estimate_cost
 from pathlib import Path
 
 def test_estimate_cost_output():
