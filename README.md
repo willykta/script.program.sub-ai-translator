@@ -54,7 +54,7 @@ It’s especially useful for users who want to enjoy movies and shows with subti
 
 ## 🚀 Installation
 
-1. [Download the latest `.zip` release](https://github.com/your-user/script.program.sub-ai-translator/releases)
+1. [Download the latest `.zip` release](https://github.com/re999/script.program.sub-ai-translator/releases)
 2. In Kodi:
    - Go to **Add-ons → Install from zip file**
    - Select the downloaded `.zip`
