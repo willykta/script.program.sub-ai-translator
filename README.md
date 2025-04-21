@@ -94,7 +94,7 @@ Accessible via **Add-on Settings**:
 If you find this add-on useful:
 
 - 🌟 Star it on GitHub
-- 🧡 [Sponsor via BuyMeACoffee](https://www.buymeacoffee.com/your-name)
+- 🧡 [Sponsor via BuyMeACoffee](https://buymeacoffee.com/re999)
 - 🐛 Report bugs or suggest features
 
 ---
@@ -107,4 +107,4 @@ This project is licensed under the **MIT License**, see the `LICENSE` file for d
 
 ---
 
-**© 2025 by [re999]**
+**© 2025 by re999**
