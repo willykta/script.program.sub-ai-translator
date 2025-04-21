@@ -9,15 +9,14 @@ sys.path.insert(0, os.path.join(addon_dir, "api"))
 
 from core.translation import translate_subtitles
 from core.estimation import estimate_cost
+from core import settings
+
 import api.mock as mock
 import api.openai as openai
 
 addon = xbmcaddon.Addon("script.program.sub-ai-translator")
-lang = addon.getSetting("target_lang")
-use_mock = addon.getSettingBool("use_mock")
-api_key = addon.getSetting("api_key")
-model = "gpt-3.5-turbo"
 _ = addon.getLocalizedString
+cfg = settings.get()
 
 if len(sys.argv) > 1 and os.path.isfile(sys.argv[1]):
     srt_path = sys.argv[1]
@@ -27,7 +26,7 @@ else:
         xbmcgui.Dialog().notification(_(30000), _(30001), xbmcgui.NOTIFICATION_INFO, 3000)
         exit()
 
-est = estimate_cost(srt_path, lang)
+est = estimate_cost(srt_path, cfg["lang"], cfg["price_per_1000_tokens"])
 
 if not xbmcgui.Dialog().yesno(
     _(30002),
@@ -36,14 +35,14 @@ if not xbmcgui.Dialog().yesno(
     xbmcgui.Dialog().notification(_(30000), _(30001), xbmcgui.NOTIFICATION_INFO, 3000)
     exit()
 
-call_fn = mock if use_mock else openai
+call_fn = mock if cfg["use_mock"] else openai
 
 progress = xbmcgui.DialogProgress()
 progress.create(_(30000), "…")
 
 def report_progress(idx, total):
     percent = int(100 * idx / total)
-    progress.update(percent, f"{_(30000)}: {idx} / {total}")
+    progress.update(percent, f"{_(30000)}: {percent}%")
 
 def check_cancelled():
     return progress.iscanceled()
@@ -51,15 +50,24 @@ def check_cancelled():
 try:
     out_path = translate_subtitles(
         srt_path,
-        api_key,
-        lang,
-        model,
+        cfg["api_key"],
+        cfg["lang"],
+        cfg["model"],
         call_fn,
         report_progress=report_progress,
-        check_cancelled=check_cancelled
+        check_cancelled=check_cancelled,
+        parallel=cfg["parallel"]
     )
     progress.close()
-    xbmcgui.Dialog().notification(_(30004), _(30005).format(filename=os.path.basename(out_path)), xbmcgui.NOTIFICATION_INFO, 5000)
+    xbmcgui.Dialog().notification(
+        _(30004),
+        _(30005).format(filename=os.path.basename(out_path)),
+        xbmcgui.NOTIFICATION_INFO,
+        5000
+    )
 except Exception as e:
     progress.close()
+    import traceback
+    xbmc.log(f"[Sub-AI Translator] Exception: {e}", level=xbmc.LOGERROR)
+    xbmc.log(traceback.format_exc(), level=xbmc.LOGERROR)
     xbmcgui.Dialog().notification(_(30006), str(e), xbmcgui.NOTIFICATION_ERROR, 5000)

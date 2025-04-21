@@ -37,9 +37,18 @@ def merge_translations(blocks, translated_pairs):
         for i, text in sorted(translated_pairs, key=lambda x: x[0])
     ]
 
-def translate_subtitles(path, api_key, lang, model, call_fn, report_progress=None, check_cancelled=None):
+def translate_subtitles(
+    path,
+    api_key,
+    lang,
+    model,
+    call_fn,
+    report_progress=None,
+    check_cancelled=None,
+    parallel=3
+):
     blocks = parse_srt(path)
-    with ThreadPoolExecutor(max_workers=3) as ex:
+    with ThreadPoolExecutor(max_workers=parallel) as ex:
         futures = create_futures(blocks, lang, model, api_key, call_fn, ex)
         results = completed_results(futures, len(futures), report_progress, check_cancelled)
     merged = merge_translations(blocks, results)

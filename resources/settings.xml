@@ -1,7 +1,18 @@
 <settings>
-    <category label="Ustawienia tłumaczenia">
-        <setting id="target_lang" type="text" label="Język docelowy (np. PL)" default="PL" />
-        <setting id="use_mock" type="bool" label="Użyj mockowego API (testowe)" default="true" />
-        <setting id="api_key" type="text" label="Klucz API OpenAI" default="" />
+    <category label="OpenAI">
+        <setting id="api_key" type="text" label="API Key" default="" />
+        <setting id="model" type="enum" label="Model" values="gpt-3.5-turbo|gpt-4|gpt-4-turbo" default="0" />
+        <setting id="price_per_1000_tokens" type="text" label="Price per 1000 tokens (USD)" default="0.001" />
+    </category>
+
+    <category label="Translation">
+        <setting id="target_lang" type="enum" label="Target Language" values="English|Polish|German|Spanish|Other" default="1" />
+        <setting id="custom_lang" type="text" label="Custom Language (if 'Other')" default="" />
+        <setting id="style_hint" type="text" label="Translation Style Hint" default="" />
+    </category>
+
+    <category label="Advanced">
+        <setting id="use_mock" type="bool" label="Use Mock API (for testing)" default="false" />
+        <setting id="parallel_requests" type="number" label="Parallel API requests" default="3" range="1,10" />
     </category>
 </settings>
