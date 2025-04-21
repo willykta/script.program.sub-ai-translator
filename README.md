@@ -42,6 +42,9 @@ It’s especially useful for users who want to enjoy movies and shows with subti
 ![Model Configuration](resources/screenshots/configuration_model.png)
 
 ### Translate from File Selector
+
+When you run the add-on file selector lets you choose srt file.
+
 ![File Selector](resources/screenshots/translate_file_selector.png)
 
 ### Translate from Context Menu
