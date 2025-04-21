@@ -55,19 +55,20 @@ When you run the add-on file selector lets you choose srt file.
 
 ---
 
-## 🚀 Installation
+## 🚀 Installation and usage
 
 1. [Download the latest `.zip` release](https://github.com/re999/script.program.sub-ai-translator/releases)
 2. In Kodi:
    - Go to **Add-ons → Install from zip file**
    - Select the downloaded `.zip`
-3. Open the add-on via:
+3. Configure the add-on by providing [OpenAI key](https://github.com/re999/script.program.sub-ai-translator/tree/main?tab=readme-ov-file#-requirements) and language settings
+4. Open the add-on via:
    - **Program Add-ons → Subtitle AI Translator**
    - Or by right-clicking a video or subtitle file → **Translate subtitles**
 
 ---
 
-## ⚙️ Configuration
+## ⚙️ Configuration options
 
 Accessible via **Add-on Settings**:
 
