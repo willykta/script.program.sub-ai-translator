@@ -31,7 +31,7 @@ msgid "Translation error"
 msgstr "Błąd tłumaczenia"
 
 msgctxt "#30007"
-msgid "Translate subtitles"
+msgid "Translate subtitles..."
 msgstr "Przetłumacz napisy..."
 
 msgctxt "#30008"

@@ -31,8 +31,8 @@ msgid "Translation error"
 msgstr "Translation error"
 
 msgctxt "#30007"
-msgid "Translate subtitles"
-msgstr "Translate subtitles"
+msgid "Translate subtitles..."
+msgstr "Translate subtitles..."
 
 msgctxt "#30008"
 msgid "No file path provided"
