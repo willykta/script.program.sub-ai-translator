@@ -10,17 +10,11 @@ sys.path.insert(0, os.path.join(addon_dir, "api"))
 from core.translation import translate_subtitles
 from core.estimation import estimate_cost
 from core import settings
-from api import mock, openai, gemini
 
 addon = xbmcaddon.Addon("script.program.sub-ai-translator")
 _ = addon.getLocalizedString
 cfg = settings.get()
-
-PROVIDER_CALL_MAP = {
-    "OpenAI": openai,
-    "Gemini": gemini,
-    "Mock (Test)": mock
-}
+call_fn = settings.get_call_fn()
 
 if len(sys.argv) > 1 and os.path.isfile(sys.argv[1]):
     srt_path = sys.argv[1]
@@ -34,15 +28,13 @@ est = estimate_cost(srt_path, cfg["lang"], cfg["price_per_1000_tokens"])
 
 if not xbmcgui.Dialog().yesno(
     _(30002),
-    _(30003).format(tokens=est["tokens"], usd=est["usd"])
+    _(30003).format(tokens=est["tokens"], usd=est["usd"]) + f"\n({cfg['provider']})"
 ):
     xbmcgui.Dialog().notification(_(30000), _(30001), xbmcgui.NOTIFICATION_INFO, 3000)
     exit()
 
-call_fn = PROVIDER_CALL_MAP.get(cfg["provider"], openai)
-
 progress = xbmcgui.DialogProgress()
-progress.create(_(30000), "…")
+progress.create(f"{_(30000)} ({cfg['provider']})", "…")
 
 def report_progress(idx, total):
     percent = int(100 * idx / total)
