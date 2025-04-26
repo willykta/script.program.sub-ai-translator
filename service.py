@@ -10,13 +10,17 @@ sys.path.insert(0, os.path.join(addon_dir, "api"))
 from core.translation import translate_subtitles
 from core.estimation import estimate_cost
 from core import settings
-
-import api.mock as mock
-import api.openai as openai
+from api import mock, openai, gemini
 
 addon = xbmcaddon.Addon("script.program.sub-ai-translator")
 _ = addon.getLocalizedString
 cfg = settings.get()
+
+PROVIDER_CALL_MAP = {
+    "OpenAI": openai,
+    "Gemini": gemini,
+    "Mock (Test)": mock
+}
 
 if len(sys.argv) > 1 and os.path.isfile(sys.argv[1]):
     srt_path = sys.argv[1]
@@ -35,7 +39,7 @@ if not xbmcgui.Dialog().yesno(
     xbmcgui.Dialog().notification(_(30000), _(30001), xbmcgui.NOTIFICATION_INFO, 3000)
     exit()
 
-call_fn = mock if cfg["use_mock"] else openai
+call_fn = PROVIDER_CALL_MAP.get(cfg["provider"], openai)
 
 progress = xbmcgui.DialogProgress()
 progress.create(_(30000), "…")
