@@ -1,0 +1,47 @@
+msgid ""
+msgstr ""
+"Language: nl\n"
+
+msgctxt "#30000"
+msgid "Translate subtitle file"
+msgstr "Vertaal ondertitelbestand"
+
+msgctxt "#30001"
+msgid "Translation cancelled"
+msgstr "Vertaling geannuleerd"
+
+msgctxt "#30002"
+msgid "Estimated cost"
+msgstr "Geschatte kosten"
+
+msgctxt "#30003"
+msgid "Estimated tokens: {tokens}\nEstimated cost: ~${usd}\n\nContinue?"
+msgstr "Geschat aantal tokens: {tokens}\nGeschatte kosten: ~${usd}\n\nDoorgaan?"
+
+msgctxt "#30004"
+msgid "Translation complete"
+msgstr "Vertaling gelukt"
+
+msgctxt "#30005"
+msgid "Saved to: {filename}"
+msgstr "Opgeslagen als: {filename}"
+
+msgctxt "#30006"
+msgid "Translation error"
+msgstr "Vertalingsfout"
+
+msgctxt "#30007"
+msgid "Translate subtitles..."
+msgstr "Vertalen van de ondertiteling..."
+
+msgctxt "#30008"
+msgid "No file path provided"
+msgstr "Geen bestandspad opgegeven"
+
+msgctxt "#30009"
+msgid "No .srt subtitles found"
+msgstr "Geen .srt ondertiteling gevonden"
+
+msgctxt "#30010"
+msgid "Choose subtitle file"
+msgstr "Kies ondertitelingsbestand"
