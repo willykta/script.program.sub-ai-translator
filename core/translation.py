@@ -40,7 +40,7 @@ def translate_in_batches(batches, lang, model, api_key, call_fn, parallel, repor
     group = next_group()
     while group:
         if check_cancelled and check_cancelled():
-            raise Exception("Tłumaczenie anulowane przez użytkownika.")
+            raise Exception("Translation interrupted by client")
 
         group_results = execute_batch_group(group, lang, model, api_key, call_fn)
         results.extend(group_results)
@@ -70,7 +70,7 @@ def translate_subtitles(
     parallel=3
 ):
     blocks = parse_srt(path)
-    batches = group_blocks(list(enumerate(blocks)), 10)
+    batches = group_blocks(list(enumerate(blocks)), 20)
     translated_pairs = translate_in_batches(
         batches, lang, model, api_key, call_fn, parallel,
         report_progress, check_cancelled

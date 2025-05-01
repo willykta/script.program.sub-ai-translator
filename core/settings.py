@@ -1,6 +1,7 @@
 from .config import MODELS, LANGUAGES, DEFAULT_PARALLEL_REQUESTS, DEFAULT_PRICE_PER_1000_TOKENS
 import xbmcaddon
 from xbmcaddon import Addon
+import xbmc
 from api import mock, openai, gemini
 from backoff import rate_limited_backoff_on_429
 
@@ -15,7 +16,7 @@ PROVIDERS = {
             "model": get_enum("model", MODELS),
             "price_per_1000_tokens": float(addon.getSetting("price_per_1000_tokens") or DEFAULT_PRICE_PER_1000_TOKENS),
             "use_mock": addon.getSettingBool("use_mock"),
-            "parallel": max(1, int(addon.getSetting("parallel_requests") or DEFAULT_PARALLEL_REQUESTS))
+            "parallel": 3 #max(1, int(addon.getSetting("parallel_requests") or DEFAULT_PARALLEL_REQUESTS))
         },
         "call_fn": openai
     },
@@ -29,7 +30,7 @@ PROVIDERS = {
             "use_mock": addon.getSettingBool("use_mock"),
             "parallel": 1
         },
-        "call_fn": gemini
+        "call_fn": rate_limited_backoff_on_429()(lambda prompt, model, api_key: gemini(prompt, model, api_key, logger=lambda msg: xbmc.log(msg, xbmc.LOGDEBUG)))
     },
     "Mock (Test)": {
         "get_config": lambda: {

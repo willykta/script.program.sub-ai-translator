@@ -17,21 +17,21 @@ def _wrap(fn, min_interval, retries, base_delay, max_delay):
         delta = now - _last_request_time
         if delta < min_interval:
             wait = min_interval - delta
-            xbmc.log(f"[RATE LIMIT] Waiting {wait:.2f}s before next call", xbmc.LOGDEBUG)
+            xbmc.log(f"[RATE LIMIT] Waiting {wait:.2f}s before next call", xbmc.LOGINFO)
             time.sleep(wait)
+
+        _last_request_time = time.time()
 
         for attempt in range(retries):
             try:
-                result = fn(*args, **kwargs)
-                _last_request_time = time.time()
-                return result
+                return fn(*args, **kwargs)
             except Exception as e:
-                status = getattr(e, "status", None) or getattr(e, "status_code", None)
+                status = getattr(e, "_http_status", None) or getattr(e, "status", None) or getattr(e, "status_code", None)
                 xbmc.log(f"[BACKOFF] Attempt {attempt + 1}, exception: {type(e).__name__} {str(e)}", xbmc.LOGERROR)
                 xbmc.log(f"[BACKOFF] Status: {status}", xbmc.LOGERROR)
                 if status != 429 or attempt == retries - 1:
                     raise
-                delay = min(base_delay * (2 ** attempt), max_delay) + uniform(1, 4)
-                xbmc.log(f"[BACKOFF] Sleeping for {delay:.2f}s", xbmc.LOGERROR)
+                delay = min(base_delay * (2 ** attempt), max_delay) + uniform(1, 3)
+                xbmc.log(f"[BACKOFF] Sleeping for {delay:.2f}s", xbmc.LOGINFO)
                 time.sleep(delay)
     return wrapped
