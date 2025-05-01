@@ -1,7 +1,7 @@
 from .prompt import build_prompt
 from .srt import parse_srt, group_blocks
 
-def estimate_cost(path, lang, price_per_1000):
+def estimate_cost(path, lang, price_per_1000=0):
     blocks = parse_srt(path)
     batches = group_blocks(blocks, 10)
 

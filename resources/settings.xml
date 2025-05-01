@@ -1,8 +1,17 @@
 <settings>
+    <category label="Provider">
+        <setting id="provider" type="enum" label="Provider" values="OpenAI|Gemini|Mock (Test)" default="0" />
+    </category>
+
     <category label="OpenAI">
-        <setting id="api_key" type="text" label="API Key" default="" />
-        <setting id="model" type="enum" label="Model" values="gpt-3.5-turbo|gpt-4|gpt-4-turbo" default="0" />
-        <setting id="price_per_1000_tokens" type="text" label="Price per 1000 tokens (USD)" default="0.001" />
+        <setting id="api_key" type="text" label="OpenAI API Key" default="" visible="eq(-2,0)" />
+        <setting id="model" type="enum" label="OpenAI Model" values="gpt-3.5-turbo|gpt-4|gpt-4-turbo" default="0" visible="eq(-3,0)" />
+        <setting id="price_per_1000_tokens" type="text" label="OpenAI Price per 1000 tokens (USD)" default="0.001" visible="eq(-4,0)" />
+    </category>
+
+    <category label="Gemini">
+        <setting id="gemini_api_key" type="text" label="Gemini API Key" default="" visible="eq(-4,1)" />
+        <setting id="gemini_model" type="enum" label="Gemini Model" values="gemini-1.5-flash-latest|gemini-1.5-pro-latest" default="0" visible="eq(-5,1)" />
     </category>
 
     <category label="Translation">
