@@ -1,7 +1,8 @@
 from .config import MODELS, LANGUAGES, DEFAULT_PARALLEL_REQUESTS, DEFAULT_PRICE_PER_1000_TOKENS
 import xbmcaddon
 from xbmcaddon import Addon
-from api import mock, openai, gemini  # importujemy dostawców na sztywno
+from api import mock, openai, gemini
+from backoff import rate_limited_backoff_on_429
 
 addon = Addon("script.program.sub-ai-translator")
 
@@ -26,7 +27,7 @@ PROVIDERS = {
             "model": get_enum("gemini_model", ["gemini-1.5-flash-latest", "gemini-1.5-pro-latest"]),
             "price_per_1000_tokens": 0.0,
             "use_mock": addon.getSettingBool("use_mock"),
-            "parallel": max(1, int(addon.getSetting("parallel_requests") or DEFAULT_PARALLEL_REQUESTS))
+            "parallel": 1
         },
         "call_fn": gemini
     },
