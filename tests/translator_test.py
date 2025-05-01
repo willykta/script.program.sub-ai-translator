@@ -80,7 +80,7 @@ def test_translate_cancel_after_first_batch(sample_paths):
 
     # When we cancel after first batch
     # Then we expect an exception
-    with pytest.raises(Exception, match="anulowane przez użytkownika"):
+    with pytest.raises(Exception, match="Translation interrupted by client"):
         translate_subtitles(
             str(input_path),
             api_key="fake",
