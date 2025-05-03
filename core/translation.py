@@ -9,7 +9,22 @@ def translate_batch(batch, lang, model, api_key, call_fn):
     texts = ["\n".join(b["lines"]) for b in batch]
     prompt = build_prompt(texts, lang)
     response = call_fn(prompt, model, api_key)
-    return extract_translations(response)
+    translations = extract_translations(response)
+    if len(translations) != len(batch):
+        log_translation_mismatch(batch, translations, prompt, response)
+    return translations
+
+
+def log_translation_mismatch(batch, translations, prompt, response):
+    print(f"[WARN] Mismatch: sent {len(batch)}, got {len(translations)}")
+    print("=== Prompt ===")
+    print(prompt)
+    print("=== Response ===")
+    print(response)
+    print("=== Batch index map ===")
+    for idx, block in enumerate(batch):
+        print(f"[{idx}] {block['lines']}")
+
 
 def execute_batch_group(group, lang, model, api_key, call_fn):
     with ThreadPoolExecutor(max_workers=len(group)) as executor:
@@ -70,7 +85,7 @@ def translate_subtitles(
     parallel=3
 ):
     blocks = parse_srt(path)
-    batches = group_blocks(list(enumerate(blocks)), 20)
+    batches = group_blocks(list(enumerate(blocks)), 15)
     translated_pairs = translate_in_batches(
         batches, lang, model, api_key, call_fn, parallel,
         report_progress, check_cancelled

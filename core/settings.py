@@ -18,7 +18,8 @@ PROVIDERS = {
             "use_mock": addon.getSettingBool("use_mock"),
             "parallel": 3 #max(1, int(addon.getSetting("parallel_requests") or DEFAULT_PARALLEL_REQUESTS))
         },
-        "call_fn": openai
+        "call_fn": rate_limited_backoff_on_429(min_interval=0, retries=3, base_delay=1.0, max_delay=8.0)(lambda prompt, model, api_key: openai(prompt, model, api_key)
+)
     },
     "Gemini": {
         "get_config": lambda: {
