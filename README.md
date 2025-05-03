@@ -11,7 +11,7 @@ It’s especially useful for users who want to enjoy movies and shows with subti
 ## 🌟 Features
 
 - 🔤 Translate `.srt` subtitle files (other formats planned)
-- 🤖 Uses **OpenAI ChatGPT** (`gpt-3.5`, `gpt-4`) and **Gemini 1.5 Flash/Pro** models
+- 🤖 Uses **OpenAI ChatGPT** (`gpt-3.5`, `gpt-4`) and **Gemini 1.5 Flash/Pro** models. The Gemini models can be used **free of charge** but are considerably slower!
 - 🤪 Mock backend for **offline testing** (no token usage)
 - 📂 Context menu support: translate subtitles from `.srt` files or folders containing video files
 - 🔧 Configurable:
@@ -61,7 +61,7 @@ When you run the add-on file selector lets you choose `.srt` file.
 2. In Kodi:
    - Go to **Add-ons → Install from zip file**
    - Select the downloaded `.zip`
-3. Configure the add-on by providing your API key(s) and language settings
+3. Configure the add-on by providing your API key(s) and language settings. **If using OpenAI key you also need to pre-paid some money** to make it work. Gemini can be used free of charge.
 4. Open the add-on via:
    - **Program Add-ons → Subtitle AI Translator**
    - Or by right-clicking a video or subtitle file → **Translate subtitles**
