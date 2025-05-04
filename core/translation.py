@@ -6,41 +6,33 @@ from .srt import parse_srt, group_blocks, write_srt
 from .prompt import build_prompt, extract_translations
 
 def translate_batch(batch, lang, model, api_key, call_fn):
-    texts = ["\n".join(b["lines"]) for b in batch]
-    prompt = build_prompt(texts, lang)
+    indexed_texts = [(i, "\n".join(b["lines"])) for i, b in batch]
+    prompt = build_prompt(indexed_texts, lang)
     response = call_fn(prompt, model, api_key)
-    translations = extract_translations(response)
-    if len(translations) != len(batch):
-        log_translation_mismatch(batch, translations, prompt, response)
-    return translations
+    translations = extract_translations(response)  # musi zwracać dict: i -> text
+
+    missing = [i for i, _ in batch if i not in translations]
+    if missing:
+        print(f"[WARN] Missing translations for indices: {missing}")
+        print("=== Prompt ===\n" + prompt)
+        print("=== Response ===\n" + response)
+
+    return [(i, translations[i]) for i, _ in batch if i in translations]
 
 
-def log_translation_mismatch(batch, translations, prompt, response):
-    print(f"[WARN] Mismatch: sent {len(batch)}, got {len(translations)}")
-    print("=== Prompt ===")
-    print(prompt)
-    print("=== Response ===")
-    print(response)
-    print("=== Batch index map ===")
-    for idx, block in enumerate(batch):
-        print(f"[{idx}] {block['lines']}")
-
+from itertools import chain
 
 def execute_batch_group(group, lang, model, api_key, call_fn):
     with ThreadPoolExecutor(max_workers=len(group)) as executor:
         futures = [
             executor.submit(
                 translate_batch,
-                [b for _, b in batch],
+                batch,  # już zawiera (i, block)
                 lang, model, api_key, call_fn
             )
             for batch in group
         ]
-        return [
-            (i, text)
-            for batch, future in zip(group, futures)
-            for (i, _), text in zip(batch, future.result())
-        ]
+        return list(chain.from_iterable(f.result() for f in futures))
 
 
 def translate_in_batches(batches, lang, model, api_key, call_fn, parallel, report_progress=None, check_cancelled=None):
@@ -68,11 +60,15 @@ def translate_in_batches(batches, lang, model, api_key, call_fn, parallel, repor
 
     return results
 
+
 def merge_translations(blocks, translated_pairs):
+    translated_map = dict(translated_pairs)
     return [
-        {**blocks[i], "lines": text.split("\n")}
-        for i, text in sorted(translated_pairs, key=lambda x: x[0])
+        {**block, "lines": translated_map[i].split("\n")}
+        for i, block in enumerate(blocks)
+        if i in translated_map
     ]
+
 
 def translate_subtitles(
     path,

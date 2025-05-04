@@ -1,5 +1,4 @@
 import pytest
-import re
 from core.srt import parse_srt, group_blocks, write_srt
 from core.prompt import build_prompt, extract_translations
 from pathlib import Path
@@ -33,27 +32,27 @@ def test_grouping_function():
     assert result == [[0, 1, 2], [3, 4, 5], [6, 7, 8], [9]]
 
 def test_build_prompt_format():
-    # Given: a list of text blocks
-    texts = ["Hello world", "Another block"]
+    # Given: a list of indexed text blocks
+    indexed_texts = [(5, "Hello world"), (12, "Another block")]
     lang = "PL"
 
     # When: building prompt
-    prompt = build_prompt(texts, lang)
+    prompt = build_prompt(indexed_texts, lang)
 
     # Then: the prompt should contain numbering and instructions
-    assert "1:\nHello world" in prompt
-    assert "2:\nAnother block" in prompt
-    assert "T\u0142umacz na j\u0119zyk PL" in prompt
+    assert "5:\nHello world" in prompt
+    assert "12:\nAnother block" in prompt
+    assert "Przetłumacz na język PL" in prompt
 
 def test_extract_translations_parses_cleanly():
     # Given: a raw model output string
-    raw = "1:\nCze\u015b\u0107\n2:\n\u015awiat"
+    raw = "7:\nCześć\n13:\nŚwiat"
 
     # When: extracting translations
     result = extract_translations(raw)
 
-    # Then: both blocks should be cleanly split
-    assert result == ["Cze\u015b\u0107", "\u015awiat"]
+    # Then: both blocks should be correctly mapped
+    assert result == {7: "Cześć", 13: "Świat"}
 
 def test_write_srt_creates_valid_file(tmp_path):
     # Given: subtitle blocks
