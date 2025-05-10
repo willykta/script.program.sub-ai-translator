@@ -45,3 +45,11 @@ msgstr "No .srt subtitles found"
 msgctxt "#30010"
 msgid "Choose subtitle file"
 msgstr "Choose subtitle file"
+
+msgctxt "#30011"
+msgid "Extracting embedded subtitles..."
+msgstr "Extracting embedded subtitles..."
+
+msgctxt "#30012"
+msgid "Failed to extract subtitles"
+msgstr "Failed to extract subtitles"

@@ -45,3 +45,11 @@ msgstr "Nie znaleziono napisów .srt"
 msgctxt "#30010"
 msgid "Choose subtitle file"
 msgstr Wybierz plik z napisami"
+
+msgctxt "#30011"
+msgid "Extracting embedded subtitles..."
+msgstr "Wyoderębnianie napisów..."
+
+msgctxt "#30012"
+msgid "Failed to extract subtitles"
+msgstr "Nie udało się wyodręnić napisów"

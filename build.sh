@@ -39,7 +39,7 @@ zip_path="${DIST_DIR}/${zip_name}"
 cd "$SCRIPT_DIR/.."
 zip -r "$zip_path" "$(basename "$SCRIPT_DIR")" \
   -x "*.pyc" "*__pycache__/*" "*.DS_Store" "*.git*" "*wheels/*" "*/dist/*" "*/build.sh" "*.pytest*" \
-  "*/.gitignore" "*/.git" "*/tests/*" "*/tests" "*/test.py" "*/test.sh"
+  "*/.gitignore" "*/.git" "*/tests/*" "*/tests" "*/test.py" "*/test.sh" "*/.venv/*" ".venv/*"
 
 echo "✅ Zbudowano: $zip_path (wersja: $new_version)"
 echo "🔄 Zaktualizowano addon.xml do wersji: $new_version"

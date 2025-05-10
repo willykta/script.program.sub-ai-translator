@@ -1,0 +1,48 @@
+import os
+import glob
+import tempfile
+from py_subtitle_extractor import (
+    extract_subtitle_tracks,
+    extract_subtitles_as_srt,
+)
+
+def list_external_subtitles(folder_path):
+    return [
+        {"label": os.path.basename(p), "type": "external", "path": p}
+        for p in sorted(glob.glob(os.path.join(folder_path, "*.srt")))
+    ]
+
+def list_embedded_subtitles(video_path):
+    return [
+        {
+            "label": f"[MKV] {t['language'] or 'und'} (Track {t['track_number']})",
+            "type": "embedded",
+            "video_path": video_path,
+            "index": t["track_number"]
+        }
+        for t in extract_subtitle_tracks(video_path)
+        if t["codec_id"].startswith("S_TEXT")
+    ]
+
+def list_available_subtitles(video_path):
+    folder = os.path.dirname(video_path)
+    external = list_external_subtitles(folder)
+    embedded = list_embedded_subtitles(video_path) if video_path.lower().endswith(".mkv") else []
+    return external + embedded
+
+def extract_to_temp_srt(video_path, index):
+    srt_text = extract_subtitles_as_srt(video_path, index)
+
+    tracks = extract_subtitle_tracks(video_path)
+    lang = next((t["language"] for t in tracks if t["track_number"] == index), "und")
+
+    folder = os.path.dirname(video_path)
+    base = os.path.splitext(os.path.basename(video_path))[0]
+    out_path = os.path.join(folder, f"{base}.{lang}.extracted.srt")
+
+    with open(out_path, "w", encoding="utf-8") as f:
+        f.write(srt_text)
+
+    return out_path
+
+

@@ -1,12 +1,17 @@
 import sys
 import os
-import glob
 import xbmc
 import xbmcgui
 import xbmcaddon
 
+addon_path = xbmcaddon.Addon().getAddonInfo('path')
+lib_path = os.path.join(addon_path, "resources", "lib")
+if lib_path not in sys.path:
+    sys.path.insert(0, lib_path)
+
+from core import subtitle_sources
+
 addon = xbmcaddon.Addon()
-addon_path = addon.getAddonInfo('path')
 _ = addon.getLocalizedString
 
 def resolve_path():
@@ -17,32 +22,61 @@ def resolve_path():
     filename = xbmc.getInfoLabel("ListItem.FilenameAndPath") or xbmc.getInfoLabel("ListItem.Filename")
     
     if path and filename:
-        full_path = os.path.join(path, filename) if not filename.startswith(path) else filename
-        if os.path.isfile(full_path):
-            return full_path
-
+        return os.path.join(path, filename) if not filename.startswith(path) else filename
     return None
 
-selected_path = resolve_path()
-
-if not selected_path:
-    xbmcgui.Dialog().notification(_(30006), _(30008), xbmcgui.NOTIFICATION_ERROR, 3000)
-    sys.exit(1)
+def notify_error(message_id):
+    xbmcgui.Dialog().notification(_(30006), _(message_id), xbmcgui.NOTIFICATION_ERROR, 3000)
 
 def run_translation(srt_path):
     xbmc.executebuiltin(f'RunScript(script.program.sub-ai-translator, "{srt_path}")')
 
+def handle_external_subtitle(path):
+    run_translation(path)
 
-if selected_path.lower().endswith(".srt"):
-    run_translation(selected_path)
-else:
-    folder = os.path.dirname(selected_path)
-    srt_files = sorted(glob.glob(os.path.join(folder, "*.srt")))
-    if not srt_files:
-        xbmcgui.Dialog().notification(_(30006), _(30009), xbmcgui.NOTIFICATION_INFO, 3000)
-        sys.exit(0)
+def handle_embedded_subtitle(video_path, track_index):
+    progress = xbmcgui.DialogProgress()
+    progress.create("SubAI", _(30011))  # "Extracting embedded subtitles..."
+    try:
+        srt_path = subtitle_sources.extract_to_temp_srt(video_path, track_index)
+        progress.close()
+        run_translation(srt_path)
+    except Exception as e:
+        progress.close()
+        xbmc.log(f"[SubAI] Failed to extract subtitles: {e}", xbmc.LOGERROR)
+        notify_error(30012)  # "Failed to extract subtitles"
+        sys.exit(1)
 
-    labels = [os.path.basename(p) for p in srt_files]
+def choose_subtitle_entry(entries):
+    labels = [entry["label"] for entry in entries]
     choice = xbmcgui.Dialog().select(_(30010), labels)
-    if choice >= 0:
-        run_translation(srt_files[choice])
+    return entries[choice] if choice >= 0 else None
+
+def main():
+    selected_path = resolve_path()
+
+    if not selected_path:
+        notify_error(30008)  # "Could not resolve selected path"
+        sys.exit(1)
+
+    if selected_path.lower().endswith(".srt"):
+        run_translation(selected_path)
+        return
+
+    entries = subtitle_sources.list_available_subtitles(selected_path)
+
+    if not entries:
+        xbmcgui.Dialog().notification(_(30006), _(30009), xbmcgui.NOTIFICATION_INFO, 3000)
+        return
+
+    selected = choose_subtitle_entry(entries)
+    if not selected:
+        return
+
+    if selected["type"] == "external":
+        handle_external_subtitle(selected["path"])
+    else:
+        handle_embedded_subtitle(selected["video_path"], selected["index"])
+
+if __name__ == "__main__":
+    main()
