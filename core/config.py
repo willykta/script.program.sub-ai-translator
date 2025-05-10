@@ -4,6 +4,7 @@ LANGUAGES = [
     "German",
     "Dutch",
     "Spanish",
+    "Italian",
     "Other"
 ]
 

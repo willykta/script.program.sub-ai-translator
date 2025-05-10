@@ -15,7 +15,7 @@
     </category>
 
     <category label="Translation">
-        <setting id="target_lang" type="enum" label="Target Language" values="English|Polish|German|Dutch|Spanish|Other" default="1" />
+        <setting id="target_lang" type="enum" label="Target Language" values="English|Polish|German|Dutch|Spanish|Italian|Other" default="1" />
         <setting id="custom_lang" type="text" label="Custom Language (if 'Other')" default="" />
         <setting id="style_hint" type="text" label="Translation Style Hint" default="" />
     </category>
