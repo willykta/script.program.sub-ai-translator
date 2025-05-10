@@ -10,9 +10,12 @@ if lib_path not in sys.path:
     sys.path.insert(0, lib_path)
 
 from core import subtitle_sources
+from core.language_labels import get_language_label
 
 addon = xbmcaddon.Addon()
 _ = addon.getLocalizedString
+
+kodi_lang = xbmc.getLanguage(xbmc.ISO_639_1, True)
 
 def resolve_path():
     if len(sys.argv) > 1 and os.path.isfile(sys.argv[1]):
@@ -36,7 +39,7 @@ def handle_external_subtitle(path):
 
 def handle_embedded_subtitle(video_path, track_index):
     progress = xbmcgui.DialogProgress()
-    progress.create("SubAI", _(30011))  # "Extracting embedded subtitles..."
+    progress.create("Subtitle AI Translator", _(30011)) 
     try:
         srt_path = subtitle_sources.extract_to_temp_srt(video_path, track_index)
         progress.close()
@@ -44,7 +47,7 @@ def handle_embedded_subtitle(video_path, track_index):
     except Exception as e:
         progress.close()
         xbmc.log(f"[SubAI] Failed to extract subtitles: {e}", xbmc.LOGERROR)
-        notify_error(30012)  # "Failed to extract subtitles"
+        notify_error(30012) 
         sys.exit(1)
 
 def choose_subtitle_entry(entries):
@@ -52,18 +55,28 @@ def choose_subtitle_entry(entries):
     choice = xbmcgui.Dialog().select(_(30010), labels)
     return entries[choice] if choice >= 0 else None
 
+def with_labels(entries):
+    def label(entry):
+        if entry["type"] == "external":
+            return {**entry, "label": os.path.basename(entry["path"])}
+        lang = entry["language"]
+        name = get_language_label(lang, kodi_lang)
+        return {**entry, "label": f"[MKV] {name} ({lang})"}
+    return list(map(label, entries))
+
+
 def main():
     selected_path = resolve_path()
 
     if not selected_path:
-        notify_error(30008)  # "Could not resolve selected path"
+        notify_error(30008) 
         sys.exit(1)
 
     if selected_path.lower().endswith(".srt"):
         run_translation(selected_path)
         return
 
-    entries = subtitle_sources.list_available_subtitles(selected_path)
+    entries = with_labels(subtitle_sources.list_available_subtitles(selected_path))
 
     if not entries:
         xbmcgui.Dialog().notification(_(30006), _(30009), xbmcgui.NOTIFICATION_INFO, 3000)

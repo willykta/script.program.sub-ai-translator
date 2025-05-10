@@ -26,7 +26,7 @@ PROVIDERS = {
             "provider": "Gemini",
             "lang": get_effective_lang(),
             "api_key": addon.getSetting("gemini_api_key"),
-            "model": get_enum("gemini_model", ["gemini-1.5-flash-latest", "gemini-1.5-pro-latest"]),
+            "model": get_enum("gemini_model", ["gemini-1.5-flash-latest", "gemini-1.5-pro-latest", "gemini-2.0-flash"]),
             "price_per_1000_tokens": 0.0,
             "use_mock": addon.getSettingBool("use_mock"),
             "parallel": 1

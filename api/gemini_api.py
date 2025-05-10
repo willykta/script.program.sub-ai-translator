@@ -3,8 +3,12 @@ import urllib.request
 import urllib.error
 import time
 
+def get_api_version_for_model(model: str) -> str:
+    return "v1" if model.startswith("gemini-2.") else "v1beta"
+
 def call(prompt, model, api_key, logger=print):
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+    api_version = get_api_version_for_model(model)
+    url = f"https://generativelanguage.googleapis.com/{api_version}/models/{model}:generateContent?key={api_key}"
     headers = {"Content-Type": "application/json"}
     data = {
         "contents": [{

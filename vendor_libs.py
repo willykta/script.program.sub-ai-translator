@@ -7,19 +7,21 @@ import json
 from pathlib import Path
 from packaging.version import parse
 
-PACKAGE = "py-subtitle-extractor"
-VENDOR_DIR = Path("resources/lib/py_subtitle_extractor")
-INIT_FILE = VENDOR_DIR / "__init__.py"
+SUBTITLE_PACKAGE = "py-subtitle-extractor"
+BABEL_PACKAGE = "babel"
+SUBTITLE_DIR = Path("resources/lib/py_subtitle_extractor")
+BABEL_DIR = Path("resources/lib/babel")
+SUBTITLE_INIT = SUBTITLE_DIR / "__init__.py"
 
-def get_latest_version_from_pypi():
-    with urllib.request.urlopen(f"https://pypi.org/pypi/{PACKAGE}/json") as resp:
+def get_latest_version_from_pypi(package):
+    with urllib.request.urlopen(f"https://pypi.org/pypi/{package}/json") as resp:
         data = json.load(resp)
         return data["info"]["version"]
 
-def get_vendored_version():
-    if not INIT_FILE.exists():
+def get_vendored_version(init_path: Path):
+    if not init_path.exists():
         return None
-    for line in INIT_FILE.read_text().splitlines():
+    for line in init_path.read_text().splitlines():
         if line.startswith("__version__"):
             return line.split("=")[-1].strip().strip('"\'')
     return None
@@ -31,40 +33,48 @@ def inject_version(init_path: Path, version: str):
             f.write(f'\n__version__ = "{version}"\n')
         print(f"ℹ️  Injected __version__ = \"{version}\"")
 
-def vendor_package(version: str):
-    print(f"📦 Vendoring {PACKAGE}=={version}")
+def vendor_package(package: str, target_dir: Path, subpaths: list[str] = None, version: str = None):
+    version_str = f"=={version}" if version else ""
+    print(f"📦 Vendoring {package}{version_str}")
     with tempfile.TemporaryDirectory() as tmp:
         subprocess.check_call([
-            "pip", "install", f"{PACKAGE}=={version}", "--target", tmp
+            "pip", "install", f"{package}{version_str}", "--target", tmp
         ])
-        src = Path(tmp) / PACKAGE.replace("-", "_")
+        src = Path(tmp) / package.replace("-", "_")
         if not src.exists():
             raise RuntimeError(f"Package not found in {tmp}")
 
-        if VENDOR_DIR.exists():
-            shutil.rmtree(VENDOR_DIR)
-        shutil.copytree(src, VENDOR_DIR)
+        if target_dir.exists():
+            shutil.rmtree(target_dir)
+        target_dir.mkdir(parents=True)
 
-    if INIT_FILE.exists():
-        inject_version(INIT_FILE, version)
-    else:
-        print("⚠️  __init__.py not found, cannot inject version")
-    print("✅ Vendoring complete")
+        if subpaths:
+            for sub in subpaths:
+                src_path = src / sub
+                dst_path = target_dir / sub
+                if src_path.is_dir():
+                    shutil.copytree(src_path, dst_path)
+                elif src_path.is_file():
+                    shutil.copy2(src_path, dst_path)
+                else:
+                    print(f"⚠️  Skipped missing path: {src_path}")
+        else:
+            shutil.copytree(src, target_dir, dirs_exist_ok=True)
+
+    print(f"✅ Vendored {package} into {target_dir}")
 
 def main():
-    latest = get_latest_version_from_pypi()
-    vendored = get_vendored_version()
+    latest_sub = get_latest_version_from_pypi(SUBTITLE_PACKAGE)
+    vendored_sub = get_vendored_version(SUBTITLE_INIT)
 
-    if vendored is None:
-        print(f"Vendored version not found, installing {latest}")
-        vendor_package(latest)
-        return
-
-    if parse(vendored) < parse(latest):
-        print(f"⚠️  Outdated: vendored = {vendored}, latest = {latest}")
-        vendor_package(latest)
+    if vendored_sub is None or parse(vendored_sub) < parse(latest_sub):
+        print(f"🔄 Updating {SUBTITLE_PACKAGE}: {vendored_sub or 'none'} → {latest_sub}")
+        vendor_package(SUBTITLE_PACKAGE, SUBTITLE_DIR, version=latest_sub)
+        inject_version(SUBTITLE_INIT, latest_sub)
     else:
-        print(f"✅ Vendored {PACKAGE} is up to date ({vendored})")
+        print(f"✅ {SUBTITLE_PACKAGE} is up to date ({vendored_sub})")
+
+    vendor_package(BABEL_PACKAGE, BABEL_DIR) 
 
 if __name__ == "__main__":
     main()

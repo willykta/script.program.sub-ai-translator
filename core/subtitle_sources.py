@@ -15,14 +15,15 @@ def list_external_subtitles(folder_path):
 def list_embedded_subtitles(video_path):
     return [
         {
-            "label": f"[MKV] {t['language'] or 'und'} (Track {t['track_number']})",
             "type": "embedded",
             "video_path": video_path,
-            "index": t["track_number"]
+            "index": t["track_number"],
+            "language": t["language"] or "und"
         }
         for t in extract_subtitle_tracks(video_path)
         if t["codec_id"].startswith("S_TEXT")
     ]
+
 
 def list_available_subtitles(video_path):
     folder = os.path.dirname(video_path)
