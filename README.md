@@ -11,9 +11,10 @@ It’s especially useful for users who want to enjoy movies and shows with subti
 ## 🌟 Features
 
 - 🔤 Translate `.srt` subtitle files (other formats planned)
-- 🤖 Uses **OpenAI ChatGPT** (`gpt-3.5`, `gpt-4`) and **Gemini 1.5 Flash/Pro** models. The Gemini models can be used **free of charge** but are considerably slower!
+- 🤖 Uses **OpenAI ChatGPT** (`gpt-3.5`, `gpt-4`) and **Gemini 1.5/2.0 Flash/Pro** models. The Gemini models can be used **free of charge** but are slower!
 - 🤪 Mock backend for **offline testing** (no token usage)
-- 📂 Context menu support: translate subtitles from `.srt` files or folders containing video files
+- 📂 Context menu support on video file:
+  - Translate subtitles from `.srt` files or folders containing video files or **extracted from MKV** (currently experimental)
 - 🔧 Configurable:
   - Target language (predefined or custom)
   - LLM provider (OpenAI or Gemini)
@@ -87,7 +88,6 @@ Accessible via **Add-on Settings**:
 ## 💡 Roadmap
 
 - [ ] Pause/resume translations
-- [ ] Support for subtitle extraction from video files (e.g., `.mkv`)
 - [ ] Additional LLM backends (Mistral, Claude, local models, etc.)
 - [ ] GUI improvements and setup wizard
 - [ ] Format support beyond `.srt` (e.g., `.ass`, embedded subtitles)
