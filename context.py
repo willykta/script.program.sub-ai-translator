@@ -10,12 +10,10 @@ if lib_path not in sys.path:
     sys.path.insert(0, lib_path)
 
 from core import subtitle_sources
-from core.language_labels import get_language_label
+from core.config_languages import get_language_display
 
 addon = xbmcaddon.Addon()
 _ = addon.getLocalizedString
-
-kodi_lang = xbmc.getLanguage(xbmc.ISO_639_1, True)
 
 def resolve_path():
     if len(sys.argv) > 1 and os.path.isfile(sys.argv[1]):
@@ -67,7 +65,7 @@ def with_labels(entries):
         if entry["type"] == "external":
             return {**entry, "label": os.path.basename(entry["path"])}
         lang = entry["language"]
-        name = get_language_label(lang, kodi_lang)
+        name = get_language_display(lang)
         return {**entry, "label": f"[MKV] {name} ({lang})"}
     return list(map(label, entries))
 

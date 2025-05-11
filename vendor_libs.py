@@ -8,9 +8,7 @@ from pathlib import Path
 from packaging.version import parse
 
 SUBTITLE_PACKAGE = "py-subtitle-extractor"
-BABEL_PACKAGE = "babel"
 SUBTITLE_DIR = Path("resources/lib/py_subtitle_extractor")
-BABEL_DIR = Path("resources/lib/babel")
 SUBTITLE_INIT = SUBTITLE_DIR / "__init__.py"
 
 def get_latest_version_from_pypi(package):
@@ -73,8 +71,6 @@ def main():
         inject_version(SUBTITLE_INIT, latest_sub)
     else:
         print(f"✅ {SUBTITLE_PACKAGE} is up to date ({vendored_sub})")
-
-    vendor_package(BABEL_PACKAGE, BABEL_DIR) 
 
 if __name__ == "__main__":
     main()
