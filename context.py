@@ -40,8 +40,15 @@ def handle_external_subtitle(path):
 def handle_embedded_subtitle(video_path, track_index):
     progress = xbmcgui.DialogProgress()
     progress.create("Subtitle AI Translator", _(30011)) 
+
+    def on_progress(pct):
+        if progress.iscanceled():
+            raise Exception("Subtitle extraction cancelled by user")
+        percent = int(pct * 100)
+        progress.update(percent, f"{_(30011)}: {percent}%")
+
     try:
-        srt_path = subtitle_sources.extract_to_temp_srt(video_path, track_index)
+        srt_path = subtitle_sources.extract_to_temp_srt(video_path, track_index, on_progress)
         progress.close()
         run_translation(srt_path)
     except Exception as e:

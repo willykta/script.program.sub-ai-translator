@@ -24,15 +24,14 @@ def list_embedded_subtitles(video_path):
         if t["codec_id"].startswith("S_TEXT")
     ]
 
-
 def list_available_subtitles(video_path):
     folder = os.path.dirname(video_path)
     external = list_external_subtitles(folder)
     embedded = list_embedded_subtitles(video_path) if video_path.lower().endswith(".mkv") else []
     return external + embedded
 
-def extract_to_temp_srt(video_path, index):
-    srt_text = extract_subtitles_as_srt(video_path, index)
+def extract_to_temp_srt(video_path, index, on_progress=None):
+    srt_text = extract_subtitles_as_srt(video_path, index, on_progress)
 
     tracks = extract_subtitle_tracks(video_path)
     lang = next((t["language"] for t in tracks if t["track_number"] == index), "und")
