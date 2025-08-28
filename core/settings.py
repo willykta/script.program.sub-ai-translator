@@ -2,8 +2,8 @@ from .config import MODELS, LANGUAGES, DEFAULT_PARALLEL_REQUESTS, DEFAULT_PRICE_
 import xbmcaddon
 from xbmcaddon import Addon
 import xbmc
-from api import mock, openai, gemini
-from backoff import rate_limited_backoff_on_429
+from api import mock, openai, gemini, openrouter
+from .backoff import rate_limited_backoff_on_429
 
 addon = Addon("script.program.sub-ai-translator")
 
@@ -16,10 +16,9 @@ PROVIDERS = {
             "model": get_enum("model", MODELS),
             "price_per_1000_tokens": float(addon.getSetting("price_per_1000_tokens") or DEFAULT_PRICE_PER_1000_TOKENS),
             "use_mock": addon.getSettingBool("use_mock"),
-            "parallel": 3 #max(1, int(addon.getSetting("parallel_requests") or DEFAULT_PARALLEL_REQUESTS))
+            "parallel": max(1, int(addon.getSetting("parallel_requests") or DEFAULT_PARALLEL_REQUESTS))
         },
-        "call_fn": rate_limited_backoff_on_429(min_interval=0, retries=3, base_delay=1.0, max_delay=8.0)(lambda prompt, model, api_key: openai(prompt, model, api_key)
-)
+        "call_fn": rate_limited_backoff_on_429(provider="OpenAI")(lambda prompt, model, api_key: openai(prompt, model, api_key))
     },
     "Gemini": {
         "get_config": lambda: {
@@ -31,7 +30,27 @@ PROVIDERS = {
             "use_mock": addon.getSettingBool("use_mock"),
             "parallel": 1
         },
-        "call_fn": rate_limited_backoff_on_429()(lambda prompt, model, api_key: gemini(prompt, model, api_key, logger=lambda msg: xbmc.log(msg, xbmc.LOGDEBUG)))
+        "call_fn": rate_limited_backoff_on_429(provider="Gemini")(lambda prompt, model, api_key: gemini(prompt, model, api_key, logger=lambda msg: xbmc.log(msg, xbmc.LOGDEBUG)))
+    },
+    "OpenRouter": {
+        "get_config": lambda: {
+            "provider": "OpenRouter",
+            "lang": get_effective_lang(),
+            "api_key": addon.getSetting("openrouter_api_key"),
+            "model": get_enum("openrouter_model", [
+                "openai/gpt-4o-mini",
+                "openai/gpt-4o",
+                "openai/gpt-4-turbo",
+                "anthropic/claude-3.5-sonnet",
+                "google/gemini-pro",
+                "meta-llama/llama-3.1-70b-instruct",
+                "mistralai/mistral-large"
+            ]),
+            "price_per_1000_tokens": 0.0,
+            "use_mock": addon.getSettingBool("use_mock"),
+            "parallel": max(1, min(3, int(addon.getSetting("parallel_requests") or DEFAULT_PARALLEL_REQUESTS)))
+        },
+        "call_fn": rate_limited_backoff_on_429(provider="OpenRouter")(lambda prompt, model, api_key: openrouter(prompt, model, api_key, logger=lambda msg: xbmc.log(msg, xbmc.LOGDEBUG)))
     },
     "Mock (Test)": {
         "get_config": lambda: {

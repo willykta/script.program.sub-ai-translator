@@ -1,9 +1,10 @@
-from api import mock, openai, gemini
+from api import mock, openai, gemini, openrouter
 
 PROVIDERS = {
     "Mock": mock,
     "OpenAI": openai,
-    "Gemini": gemini
+    "Gemini": gemini,
+    "OpenRouter": openrouter
 }
 
 def get_provider(name: str):
