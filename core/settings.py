@@ -16,7 +16,7 @@ PROVIDERS = {
             "model": get_enum("model", MODELS),
             "price_per_1000_tokens": float(addon.getSetting("price_per_1000_tokens") or DEFAULT_PRICE_PER_1000_TOKENS),
             "use_mock": addon.getSettingBool("use_mock"),
-            "parallel": max(1, int(addon.getSetting("parallel_requests") or DEFAULT_PARALLEL_REQUESTS))
+            "parallel": max(1, min(10, int(addon.getSetting("parallel_requests") or DEFAULT_PARALLEL_REQUESTS)))  # Increased max to 10
         },
         "call_fn": rate_limited_backoff_on_429(provider="OpenAI")(lambda prompt, model, api_key: openai(prompt, model, api_key))
     },
@@ -28,7 +28,7 @@ PROVIDERS = {
             "model": get_enum("gemini_model", ["gemini-1.5-flash-latest", "gemini-1.5-pro-latest", "gemini-2.0-flash"]),
             "price_per_1000_tokens": 0.0,
             "use_mock": addon.getSettingBool("use_mock"),
-            "parallel": 1
+            "parallel": max(1, min(5, int(addon.getSetting("parallel_requests") or DEFAULT_PARALLEL_REQUESTS)))  # Increased max to 5
         },
         "call_fn": rate_limited_backoff_on_429(provider="Gemini")(lambda prompt, model, api_key: gemini(prompt, model, api_key, logger=lambda msg: xbmc.log(msg, xbmc.LOGDEBUG)))
     },
@@ -48,7 +48,7 @@ PROVIDERS = {
             ]),
             "price_per_1000_tokens": 0.0,
             "use_mock": addon.getSettingBool("use_mock"),
-            "parallel": max(1, min(3, int(addon.getSetting("parallel_requests") or DEFAULT_PARALLEL_REQUESTS)))
+            "parallel": max(1, min(8, int(addon.getSetting("parallel_requests") or DEFAULT_PARALLEL_REQUESTS)))  # Increased max to 8
         },
         "call_fn": rate_limited_backoff_on_429(provider="OpenRouter")(lambda prompt, model, api_key: openrouter(prompt, model, api_key, logger=lambda msg: xbmc.log(msg, xbmc.LOGDEBUG)))
     },
@@ -60,7 +60,7 @@ PROVIDERS = {
             "model": "mock-model",
             "price_per_1000_tokens": 0.0,
             "use_mock": True,
-            "parallel": max(1, int(addon.getSetting("parallel_requests") or DEFAULT_PARALLEL_REQUESTS))
+            "parallel": max(1, min(10, int(addon.getSetting("parallel_requests") or DEFAULT_PARALLEL_REQUESTS)))  # Increased max to 10
         },
         "call_fn": mock
     }

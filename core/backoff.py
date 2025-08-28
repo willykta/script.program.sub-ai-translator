@@ -6,45 +6,45 @@ import xbmc
 # Provider-specific rate limiting parameters
 PROVIDER_CONFIG = {
     "OpenAI": {
-        "min_interval": 0.1,  # OpenAI has high rate limits
-        "retries": 3,
-        "base_delay": 1.0,
-        "max_delay": 8.0,
+        "min_interval": 0.02,  # Much more aggressive with connection pooling
+        "retries": 2,          # Fewer retries needed with connection pooling
+        "base_delay": 0.5,     # Reduced base delay
+        "max_delay": 3.0,      # Reduced max delay
         "error_handlers": {
-            429: {"strategy": "exponential", "multiplier": 2.0},  # Rate limit
-            502: {"strategy": "fixed", "delay": 2.0},             # Bad gateway
-            503: {"strategy": "fixed", "delay": 5.0},             # Service unavailable
+            429: {"strategy": "exponential", "multiplier": 1.5},  # More conservative rate limit handling
+            502: {"strategy": "fixed", "delay": 1.0},             # Reduced delay
+            503: {"strategy": "fixed", "delay": 2.0},             # Reduced delay
         }
     },
     "Gemini": {
-        "min_interval": 0.2,  # Gemini has moderate rate limits
-        "retries": 3,
-        "base_delay": 1.5,
-        "max_delay": 10.0,
+        "min_interval": 0.05,  # More aggressive with connection pooling
+        "retries": 2,          # Fewer retries needed
+        "base_delay": 0.8,     # Reduced base delay
+        "max_delay": 5.0,      # Reduced max delay
         "error_handlers": {
-            429: {"strategy": "exponential", "multiplier": 2.5},  # Rate limit
-            500: {"strategy": "fixed", "delay": 3.0},             # Server error
-            503: {"strategy": "fixed", "delay": 5.0},             # Service unavailable
+            429: {"strategy": "exponential", "multiplier": 2.0},  # Rate limit
+            500: {"strategy": "fixed", "delay": 1.5},             # Reduced delay
+            503: {"strategy": "fixed", "delay": 2.5},             # Reduced delay
         }
     },
     "OpenRouter": {
-        "min_interval": 1.0,  # OpenRouter has stricter rate limits
-        "retries": 5,
-        "base_delay": 2.0,
-        "max_delay": 30.0,
+        "min_interval": 0.1,   # Much more aggressive with connection pooling
+        "retries": 3,          # Slightly reduced retries
+        "base_delay": 1.0,     # Reduced base delay
+        "max_delay": 10.0,     # Reduced max delay
         "error_handlers": {
-            429: {"strategy": "exponential", "multiplier": 3.0},  # Rate limit
-            502: {"strategy": "fixed", "delay": 3.0},             # Bad gateway
-            503: {"strategy": "fixed", "delay": 10.0},            # Service unavailable
+            429: {"strategy": "exponential", "multiplier": 2.0},  # Reduced multiplier
+            502: {"strategy": "fixed", "delay": 1.5},             # Reduced delay
+            503: {"strategy": "fixed", "delay": 3.0},             # Reduced delay
         }
     },
     "default": {
-        "min_interval": 0.5,
-        "retries": 3,
-        "base_delay": 1.0,
-        "max_delay": 10.0,
+        "min_interval": 0.1,   # More aggressive default
+        "retries": 2,          # Fewer retries
+        "base_delay": 0.5,     # Reduced base delay
+        "max_delay": 5.0,      # Reduced max delay
         "error_handlers": {
-            429: {"strategy": "exponential", "multiplier": 2.0},  # Default for rate limits
+            429: {"strategy": "exponential", "multiplier": 1.5},  # More conservative rate limits
         }
     }
 }

@@ -20,3 +20,11 @@ MODELS = [
 DEFAULT_PARALLEL_REQUESTS = 3
 
 DEFAULT_PRICE_PER_1000_TOKENS = 0.001
+
+# Connection pool configuration
+CONNECTION_POOL_CONFIG = {
+    "num_pools": 10,
+    "maxsize": 20,
+    "connect_timeout": 3.0,
+    "read_timeout": 20.0
+}
