@@ -6,45 +6,45 @@ import xbmc
 # Provider-specific rate limiting parameters
 PROVIDER_CONFIG = {
     "OpenAI": {
-        "min_interval": 0.02,  # Much more aggressive with connection pooling
-        "retries": 2,          # Fewer retries needed with connection pooling
+        "min_interval": 0.005,  # Ultra-aggressive with connection pooling
+        "retries": 1,           # Minimal retries to reduce overhead
+        "base_delay": 0.1,      # Much faster retry
+        "max_delay": 1.0,       # Much faster max delay
+        "error_handlers": {
+            429: {"strategy": "exponential", "multiplier": 1.2},  # Conservative rate limit handling
+            502: {"strategy": "fixed", "delay": 0.5},             # Faster delay
+            503: {"strategy": "fixed", "delay": 1.0},             # Faster delay
+        }
+    },
+    "Gemini": {
+        "min_interval": 0.02,  # More aggressive with connection pooling
+        "retries": 1,          # Fewer retries needed
         "base_delay": 0.5,     # Reduced base delay
         "max_delay": 3.0,      # Reduced max delay
         "error_handlers": {
-            429: {"strategy": "exponential", "multiplier": 1.5},  # More conservative rate limit handling
+            429: {"strategy": "exponential", "multiplier": 1.5},  # Rate limit
+            500: {"strategy": "fixed", "delay": 1.0},             # Reduced delay
+            503: {"strategy": "fixed", "delay": 1.5},             # Reduced delay
+        }
+    },
+    "OpenRouter": {
+        "min_interval": 0.05,   # Much more aggressive with connection pooling
+        "retries": 2,           # Slightly reduced retries
+        "base_delay": 0.5,      # Reduced base delay
+        "max_delay": 5.0,       # Reduced max delay
+        "error_handlers": {
+            429: {"strategy": "exponential", "multiplier": 1.5},  # Reduced multiplier
             502: {"strategy": "fixed", "delay": 1.0},             # Reduced delay
             503: {"strategy": "fixed", "delay": 2.0},             # Reduced delay
         }
     },
-    "Gemini": {
-        "min_interval": 0.05,  # More aggressive with connection pooling
-        "retries": 2,          # Fewer retries needed
-        "base_delay": 0.8,     # Reduced base delay
-        "max_delay": 5.0,      # Reduced max delay
-        "error_handlers": {
-            429: {"strategy": "exponential", "multiplier": 2.0},  # Rate limit
-            500: {"strategy": "fixed", "delay": 1.5},             # Reduced delay
-            503: {"strategy": "fixed", "delay": 2.5},             # Reduced delay
-        }
-    },
-    "OpenRouter": {
-        "min_interval": 0.1,   # Much more aggressive with connection pooling
-        "retries": 3,          # Slightly reduced retries
-        "base_delay": 1.0,     # Reduced base delay
-        "max_delay": 10.0,     # Reduced max delay
-        "error_handlers": {
-            429: {"strategy": "exponential", "multiplier": 2.0},  # Reduced multiplier
-            502: {"strategy": "fixed", "delay": 1.5},             # Reduced delay
-            503: {"strategy": "fixed", "delay": 3.0},             # Reduced delay
-        }
-    },
     "default": {
-        "min_interval": 0.1,   # More aggressive default
-        "retries": 2,          # Fewer retries
-        "base_delay": 0.5,     # Reduced base delay
-        "max_delay": 5.0,      # Reduced max delay
+        "min_interval": 0.05,   # More aggressive default
+        "retries": 1,           # Fewer retries
+        "base_delay": 0.25,     # Reduced base delay
+        "max_delay": 2.5,       # Reduced max delay
         "error_handlers": {
-            429: {"strategy": "exponential", "multiplier": 1.5},  # More conservative rate limits
+            429: {"strategy": "exponential", "multiplier": 1.2},  # More conservative rate limits
         }
     }
 }

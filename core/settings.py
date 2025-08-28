@@ -16,7 +16,7 @@ PROVIDERS = {
             "model": get_enum("model", MODELS),
             "price_per_1000_tokens": float(addon.getSetting("price_per_1000_tokens") or DEFAULT_PRICE_PER_1000_TOKENS),
             "use_mock": addon.getSettingBool("use_mock"),
-            "parallel": max(1, min(10, int(addon.getSetting("parallel_requests") or DEFAULT_PARALLEL_REQUESTS)))  # Increased max to 10
+            "parallel": max(1, min(20, int(addon.getSetting("parallel_requests") or DEFAULT_PARALLEL_REQUESTS)))  # Increased max to 20
         },
         "call_fn": rate_limited_backoff_on_429(provider="OpenAI")(lambda prompt, model, api_key: openai(prompt, model, api_key))
     },

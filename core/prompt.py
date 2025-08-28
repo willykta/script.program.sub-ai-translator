@@ -3,13 +3,13 @@ import re
 
 def build_prompt(indexed_texts, lang):
     header = (
-        f"Przetłumacz na język {lang}. Zasady:\n"
-        "- Zachowaj numerację (np. 12:, 43:, ...)\n"
-        "- Nie zmieniaj liczby linii\n"
-        "- Zachowaj układ wierszy\n"
-        "Przykład:\n"
+        f"TRANSLATE to {lang} with these rules:\n"
+        "- KEEP original numbering (e.g., 12:, 43:, ...)\n"
+        "- MAINTAIN exact line count\n"
+        "- PRESERVE line structure\n"
+        "EXAMPLE:\n"
         "1:\nHello!\n42:\nHow are you?\n\n"
-        "Tekst:\n"
+        "TRANSLATION REQUEST:\n"
     )
     numbered = "\n".join(f"{i}:\n{t}" for i, t in indexed_texts)
     return header + numbered

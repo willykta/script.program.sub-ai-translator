@@ -12,24 +12,24 @@ from .backoff import get_provider_name_from_fn
 # Provider-specific batch sizing configuration
 PROVIDER_BATCH_CONFIG = {
     "OpenAI": {
-        "max_batch_size": 50,      # Increased batch size
-        "max_content_length": 15000,  # Increased content length
-        "max_parallel": 10            # Increased parallel requests
+        "max_batch_size": 150,      # Further increased batch size
+        "max_content_length": 25000,  # Further increased content length
+        "max_parallel": 15            # Further increased parallel requests
     },
     "Gemini": {
-        "max_batch_size": 30,     # Increased batch size
-        "max_content_length": 20000,  # Increased content length
-        "max_parallel": 5             # Enable parallel processing
+        "max_batch_size": 50,     # Increased batch size
+        "max_content_length": 30000,  # Increased content length
+        "max_parallel": 8             # Enable parallel processing
     },
     "OpenRouter": {
-        "max_batch_size": 25,     # Increased batch size
-        "max_content_length": 12000,  # Increased content length
-        "max_parallel": 8             # Increased parallel requests
+        "max_batch_size": 40,     # Increased batch size
+        "max_content_length": 20000,  # Increased content length
+        "max_parallel": 12            # Increased parallel requests
     },
     "default": {
-        "max_batch_size": 20,     # Increased batch size
-        "max_content_length": 10000,  # Increased content length
-        "max_parallel": 5             # Increased parallel requests
+        "max_batch_size": 30,     # Increased batch size
+        "max_content_length": 15000,  # Increased content length
+        "max_parallel": 8             # Increased parallel requests
     }
 }
 
