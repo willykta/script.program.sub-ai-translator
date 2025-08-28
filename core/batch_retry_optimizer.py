@@ -444,7 +444,8 @@ class BatchRetryOptimizer:
         self.lock = threading.Lock()
 
     def optimize_batch_retry(self, batch: List, translate_fn: Callable,
-                           failure_context: Dict[str, Any] = None) -> Tuple[List, float]:
+                            failure_context: Dict[str, Any] = None,
+                            recursion_depth: int = 0, max_recursion_depth: int = 3) -> Tuple[List, float]:
         """
         Optimize batch retry with intelligent strategies
 
@@ -452,12 +453,22 @@ class BatchRetryOptimizer:
             batch: List of items to translate
             translate_fn: Function to translate a batch
             failure_context: Context about the failure (error, response_time, etc.)
+            recursion_depth: Current recursion depth (internal use)
+            max_recursion_depth: Maximum allowed recursion depth to prevent infinite loops
 
         Returns:
             Tuple of (successful_results, recovery_time)
         """
         start_time = time.time()
         original_size = len(batch)
+
+        # Prevent infinite recursion
+        if recursion_depth >= max_recursion_depth:
+            log_function(f"[BATCH_RETRY] Maximum recursion depth ({max_recursion_depth}) reached. "
+                        f"Falling back to individual processing for {len(batch)} items.", LOG_WARNING)
+
+            # Fallback to individual processing
+            return self._process_items_individually(batch, translate_fn, start_time)
 
         # Analyze the failure if context provided
         failure_type = FailureType.UNKNOWN
@@ -532,10 +543,10 @@ class BatchRetryOptimizer:
 
                 if remaining_items:
                     log_function(f"[BATCH_RETRY] Retrying {len(remaining_items)} remaining items", LOG_DEBUG)
-                    # Recursive call for remaining items with smaller batch size
-                    remaining_results, _ = self.optimize_batch_retry(
-                        remaining_items, translate_fn,
-                        {'error': None, 'failure_type': failure_type}
+
+                    # Use iterative approach instead of recursion to prevent stack overflow
+                    remaining_results = self._retry_remaining_items_iteratively(
+                        remaining_items, translate_fn, failure_type, recursion_depth, max_recursion_depth
                     )
                     successful_results.extend(remaining_results)
 
@@ -560,6 +571,121 @@ class BatchRetryOptimizer:
 
         return successful_results, recovery_time
 
+    def _process_items_individually(self, batch: List, translate_fn: Callable,
+                                  start_time: float) -> Tuple[List, float]:
+        """
+        Fallback method to process items individually when recursion limit is reached
+
+        Args:
+            batch: List of items to process individually
+            translate_fn: Function to translate individual items
+            start_time: Start time for performance tracking
+
+        Returns:
+            Tuple of (successful_results, recovery_time)
+        """
+        successful_results = []
+        individual_failures = 0
+
+        log_function(f"[BATCH_RETRY] Processing {len(batch)} items individually", LOG_INFO)
+
+        for item in batch:
+            try:
+                # Process each item individually with circuit breaker protection
+                result = self.circuit_breaker.call(translate_fn, [item])
+                if result:
+                    successful_results.extend(result)
+                    log_function(f"[BATCH_RETRY] Individual item processed successfully", LOG_DEBUG)
+                else:
+                    individual_failures += 1
+            except Exception as e:
+                individual_failures += 1
+                log_function(f"[BATCH_RETRY] Individual item failed: {str(e)}", LOG_DEBUG)
+
+        recovery_time = time.time() - start_time
+
+        if individual_failures > 0:
+            log_function(f"[BATCH_RETRY] Individual processing: {len(successful_results)}/{len(batch)} "
+                        f"succeeded, {individual_failures} failed", LOG_WARNING)
+
+        return successful_results, recovery_time
+
+    def _retry_remaining_items_iteratively(self, remaining_items: List, translate_fn: Callable,
+                                         failure_type: FailureType, current_depth: int,
+                                         max_depth: int) -> List:
+        """
+        Iteratively retry remaining items with progressively smaller batch sizes
+
+        Args:
+            remaining_items: Items that still need to be processed
+            translate_fn: Function to translate batches
+            failure_type: Type of failure that occurred
+            current_depth: Current recursion depth
+            max_depth: Maximum recursion depth
+
+        Returns:
+            List of successful results from remaining items
+        """
+        if not remaining_items:
+            return []
+
+        remaining_results = []
+        current_batch_size = max(1, len(remaining_items) // 2)  # Start with half the size
+
+        # Try progressively smaller batch sizes
+        while remaining_items and current_batch_size >= 1:
+            log_function(f"[BATCH_RETRY] Iterative retry: {len(remaining_items)} items, "
+                        f"batch size {current_batch_size}", LOG_DEBUG)
+
+            # Split remaining items into smaller batches
+            sub_batches = self.batch_splitter.split_batch_progressive(remaining_items, current_batch_size)
+
+            # Try each sub-batch
+            for sub_batch in sub_batches:
+                if not sub_batch:
+                    continue
+
+                try:
+                    # Check if we've reached recursion limit before attempting
+                    if current_depth >= max_depth - 1:
+                        # Use individual processing for final attempt
+                        individual_results, _ = self._process_items_individually(
+                            sub_batch, translate_fn, time.time()
+                        )
+                        remaining_results.extend(individual_results)
+                    else:
+                        # Try the sub-batch with one more level of recursion allowed
+                        sub_results, _ = self.optimize_batch_retry(
+                            sub_batch, translate_fn,
+                            {'error': None, 'failure_type': failure_type},
+                            current_depth + 1, max_depth
+                        )
+                        remaining_results.extend(sub_results)
+
+                    # Remove successfully processed items from remaining list
+                    processed_indices = {r[0] for r in remaining_results[-len(sub_batch):]}
+                    remaining_items = [item for item in remaining_items
+                                     if item[0] not in processed_indices]
+
+                except Exception as e:
+                    log_function(f"[BATCH_RETRY] Sub-batch retry failed: {str(e)}", LOG_DEBUG)
+                    # Continue to next sub-batch
+                    continue
+
+            # Reduce batch size for next iteration if we still have remaining items
+            if remaining_items:
+                current_batch_size = max(1, current_batch_size // 2)
+                # Add small delay to prevent overwhelming the service
+                time.sleep(0.1)
+
+        # Final fallback: process any remaining items individually
+        if remaining_items:
+            log_function(f"[BATCH_RETRY] Final fallback: processing {len(remaining_items)} items individually", LOG_WARNING)
+            final_results, _ = self._process_items_individually(remaining_items, translate_fn, time.time())
+            remaining_results.extend(final_results)
+
+        return remaining_results
+
     def get_performance_metrics(self) -> Dict[str, Any]:
         """Get current performance metrics"""
         return self.metrics.get_summary()
@@ -583,7 +709,8 @@ def get_batch_retry_optimizer() -> BatchRetryOptimizer:
 
 
 def optimize_batch_failure_recovery(batch: List, translate_fn: Callable,
-                                  failure_context: Dict[str, Any] = None) -> Tuple[List, float]:
+                                   failure_context: Dict[str, Any] = None,
+                                   max_recursion_depth: int = 3) -> Tuple[List, float]:
     """
     Convenience function to optimize batch failure recovery
 
@@ -591,8 +718,11 @@ def optimize_batch_failure_recovery(batch: List, translate_fn: Callable,
         batch: List of items to translate
         translate_fn: Function to translate a batch
         failure_context: Context about the failure
+        max_recursion_depth: Maximum allowed recursion depth to prevent infinite loops
 
     Returns:
         Tuple of (successful_results, recovery_time)
     """
-    return batch_retry_optimizer.optimize_batch_retry(batch, translate_fn, failure_context)
+    return batch_retry_optimizer.optimize_batch_retry(
+        batch, translate_fn, failure_context, 0, max_recursion_depth
+    )

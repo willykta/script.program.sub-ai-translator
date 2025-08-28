@@ -342,6 +342,127 @@ class PerformanceComparisonTest(unittest.TestCase):
         self.assertLess(new_time, 10)  # Should complete within reasonable time
 
 
+class RecursionFixTest(unittest.TestCase):
+    """Test cases to verify the infinite recursion bug fix"""
+
+    def setUp(self):
+        """Set up test fixtures"""
+        try:
+            from core.batch_retry_optimizer import BatchRetryOptimizer
+            self.optimizer_available = True
+            self.optimizer = BatchRetryOptimizer()
+        except ImportError:
+            self.optimizer_available = False
+            self.skipTest("BatchRetryOptimizer not available")
+
+    def test_recursion_depth_limit_prevents_infinite_recursion(self):
+        """Test that recursion depth limit prevents infinite recursion"""
+        if not self.optimizer_available:
+            return
+
+        # Mock function that always fails to trigger maximum recursion
+        call_count = 0
+        def always_failing_translate(batch):
+            nonlocal call_count
+            call_count += 1
+            raise Exception("Simulated persistent failure")
+
+        # Create test batch
+        test_batch = [(i, f"Item {i}") for i in range(5)]
+
+        # This should not cause infinite recursion and should complete
+        start_time = time.time()
+        results, recovery_time = self.optimizer.optimize_batch_retry(
+            test_batch, always_failing_translate,
+            {'error': Exception("Initial failure")},
+            max_recursion_depth=2  # Low limit to test quickly
+        )
+
+        # Should complete without hanging
+        self.assertLess(recovery_time, 30)  # Should complete in reasonable time
+        self.assertGreater(call_count, 0)  # Should have made some attempts
+
+        print(f"Recursion limit test completed in {recovery_time:.2f}s with {call_count} calls")
+
+    def test_individual_fallback_when_recursion_limit_reached(self):
+        """Test that individual processing fallback works when recursion limit is reached"""
+        if not self.optimizer_available:
+            return
+
+        # Mock function that partially succeeds then fails remaining items
+        call_count = 0
+        successful_calls = 0
+
+        def partial_success_translate(batch):
+            nonlocal call_count, successful_calls
+            call_count += 1
+
+            # First call succeeds with first half, subsequent calls fail
+            if successful_calls == 0 and len(batch) > 1:
+                successful_calls += 1
+                # Return success for first half of batch
+                mid_point = len(batch) // 2
+                return [(batch[i][0], f"Success {batch[i][1]}") for i in range(mid_point)]
+            else:
+                # Fail remaining attempts to trigger recursion limit
+                raise Exception("Persistent failure for remaining items")
+
+        # Create larger test batch to trigger the scenario
+        test_batch = [(i, f"Item {i}") for i in range(10)]
+
+        # Test with very low recursion limit to force fallback
+        results, recovery_time = self.optimizer.optimize_batch_retry(
+            test_batch, partial_success_translate,
+            {'error': Exception("Initial failure")},
+            max_recursion_depth=1  # Force quick fallback to individual processing
+        )
+
+        # Should get some results (from initial partial success)
+        self.assertGreater(len(results), 0)
+        self.assertLess(recovery_time, 10)  # Should complete reasonably fast
+
+        print(f"Fallback test: {len(results)}/{len(test_batch)} items succeeded in {recovery_time:.2f}s")
+
+    def test_iterative_retry_processes_remaining_items(self):
+        """Test that iterative retry successfully processes remaining items"""
+        if not self.optimizer_available:
+            return
+
+        # Track which items have been processed
+        processed_items = set()
+
+        def selective_failure_translate(batch):
+            # Succeed for items we haven't seen before, fail for previously failed items
+            results = []
+            for item in batch:
+                if item[0] not in processed_items:
+                    results.append((item[0], f"Success {item[1]}"))
+                    processed_items.add(item[0])
+                else:
+                    # This would cause infinite recursion in the old version
+                    raise Exception(f"Already processed item {item[0]}")
+
+            if not results:
+                raise Exception("No new items to process")
+
+            return results
+
+        # Create test batch
+        test_batch = [(i, f"Item {i}") for i in range(8)]
+
+        # This should work with the iterative approach
+        results, recovery_time = self.optimizer.optimize_batch_retry(
+            test_batch, selective_failure_translate,
+            {'error': Exception("Initial failure")}
+        )
+
+        # Should eventually succeed for all items
+        self.assertEqual(len(results), len(test_batch))
+        self.assertLess(recovery_time, 15)  # Should complete in reasonable time
+
+        print(f"Iterative retry test: {len(results)}/{len(test_batch)} items succeeded in {recovery_time:.2f}s")
+
+
 if __name__ == '__main__':
     # Run tests with verbose output
     unittest.main(verbosity=2)
