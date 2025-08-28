@@ -36,9 +36,12 @@ if not xbmcgui.Dialog().yesno(
 progress = xbmcgui.DialogProgress()
 progress.create(f"{_(30000)} ({cfg['provider']})", "…")
 
-def report_progress(idx, total):
+def report_progress(idx, total, message=None):
     percent = int(100 * idx / total)
-    progress.update(percent, f"{_(30000)}: {percent}%")
+    if message:
+        progress.update(percent, f"{_(30000)}: {message}")
+    else:
+        progress.update(percent, f"{_(30000)}: {percent}%")
 
 def check_cancelled():
     return progress.iscanceled()

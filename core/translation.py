@@ -12,9 +12,9 @@ from backoff import get_provider_name_from_fn
 # Provider-specific batch sizing configuration
 PROVIDER_BATCH_CONFIG = {
     "OpenAI": {
-        "max_batch_size": 150,      # Further increased batch size
-        "max_content_length": 25000,  # Further increased content length
-        "max_parallel": 15            # Further increased parallel requests
+        "max_batch_size": 50,         # Reduced batch size for better progress reporting
+        "max_content_length": 15000,  # Reduced content length
+        "max_parallel": 8             # Reduced parallel requests for stability
     },
     "Gemini": {
         "max_batch_size": 50,     # Increased batch size
@@ -85,6 +85,10 @@ def translate_batch(batch, lang, model, api_key, call_fn, max_retries=3):
     for attempt in range(max_retries):
         try:
             request_start_time = time.time()
+            if report_progress and total > 0:
+                # Report progress at start of batch processing
+                report_progress(0, total, f"Translating batch ({batch_size} items, attempt {attempt+1})")
+            
             response = call_fn(prompt, model, api_key)
             request_duration = time.time() - request_start_time
             
