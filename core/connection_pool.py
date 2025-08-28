@@ -1,6 +1,6 @@
 import urllib3
 import xbmc
-from .config import CONNECTION_POOL_CONFIG
+from config import CONNECTION_POOL_CONFIG
 
 class ConnectionPoolManager:
     def __init__(self, config=None):

@@ -5,9 +5,9 @@ from itertools import islice
 from itertools import chain
 import xbmc
 
-from .srt import parse_srt, group_blocks, write_srt
-from .prompt import build_prompt, extract_translations
-from .backoff import get_provider_name_from_fn
+from srt import parse_srt, group_blocks, write_srt
+from prompt import build_prompt, extract_translations
+from backoff import get_provider_name_from_fn
 
 # Provider-specific batch sizing configuration
 PROVIDER_BATCH_CONFIG = {
