@@ -11,6 +11,20 @@ from core.translation import translate_subtitles
 from core.estimation import estimate_cost
 from core import settings
 
+# Import connection pool cleanup if available
+try:
+    from core.connection_pool import cleanup_connection_pools
+    CONNECTION_POOL_AVAILABLE = True
+except ImportError:
+    CONNECTION_POOL_AVAILABLE = False
+
+# Import performance dashboard
+try:
+    from core.performance_dashboard import get_performance_dashboard, log_system_status
+    PERFORMANCE_DASHBOARD_AVAILABLE = True
+except ImportError:
+    PERFORMANCE_DASHBOARD_AVAILABLE = False
+
 addon = xbmcaddon.Addon("script.program.sub-ai-translator")
 _ = addon.getLocalizedString
 cfg = settings.get()
@@ -44,6 +58,10 @@ def check_cancelled():
     return progress.iscanceled()
 
 try:
+    # Log system status before translation
+    if PERFORMANCE_DASHBOARD_AVAILABLE:
+        log_system_status()
+
     out_path = translate_subtitles(
         srt_path,
         cfg["api_key"],
@@ -55,6 +73,11 @@ try:
         parallel=cfg["parallel"]
     )
     progress.close()
+
+    # Log system status after successful translation
+    if PERFORMANCE_DASHBOARD_AVAILABLE:
+        log_system_status()
+
     xbmcgui.Dialog().notification(
         _(30004),
         _(30005).format(filename=os.path.basename(out_path)),
@@ -66,4 +89,17 @@ except Exception as e:
     import traceback
     xbmc.log(f"[Sub-AI Translator] Exception: {e}", level=xbmc.LOGERROR)
     xbmc.log(traceback.format_exc(), level=xbmc.LOGERROR)
+
+    # Log system status after error
+    if PERFORMANCE_DASHBOARD_AVAILABLE:
+        log_system_status()
+
     xbmcgui.Dialog().notification(_(30006), str(e), xbmcgui.NOTIFICATION_ERROR, 5000)
+finally:
+    # Clean up connection pools if available
+    if CONNECTION_POOL_AVAILABLE:
+        try:
+            cleanup_connection_pools()
+            xbmc.log("[CONNECTION_POOL] Connection pools cleaned up successfully", level=xbmc.LOGINFO)
+        except Exception as e:
+            xbmc.log(f"[CONNECTION_POOL] Failed to cleanup connection pools: {str(e)}", level=xbmc.LOGWARNING)
