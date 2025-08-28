@@ -7,7 +7,7 @@ import xbmc
 # Try to import urllib3 for connection pooling
 try:
     import urllib3
-    from core.connection_pool import connection_pool_manager
+    from connection_pool import connection_pool_manager
     HAS_URLLIB3 = True
 except ImportError:
     HAS_URLLIB3 = False
