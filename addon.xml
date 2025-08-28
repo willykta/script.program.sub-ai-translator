@@ -1,4 +1,4 @@
-<addon id="script.program.sub-ai-translator" name="Subtitle AI Translator" version="1.1.6" provider-name="re999 revamped by Willyk">
+<addon id="script.program.sub-ai-translator" name="Ai Subtitles revamped" version="1.1.6" provider-name="re999 revamped by Willykta">
 
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
