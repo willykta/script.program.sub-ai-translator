@@ -76,7 +76,7 @@ def _call_with_pooling(prompt, model, api_key, logger):
             url,
             body=json.dumps(data).encode('utf-8'),
             headers=headers,
-            timeout=urllib3.Timeout(connect=3.0, read=20.0)  # Reduced timeouts with connection pooling
+            timeout=urllib3.Timeout(connect=2.0, read=15.0)  # Match connection pool timeouts
         )
         
         duration = time.time() - start

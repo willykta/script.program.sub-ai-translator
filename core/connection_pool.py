@@ -26,6 +26,16 @@ class ConnectionPoolManager:
                 block=False
             )
             xbmc.log(f"[CONNECTION_POOL] Created pool with num_pools={num_pools}, maxsize={maxsize}", xbmc.LOGDEBUG)
+            
+            # Pre-warm the connection pool with a dummy request to reduce initial connection delay
+            try:
+                # Make a simple HEAD request to OpenAI to warm up the connection
+                pool.request('HEAD', 'https://api.openai.com/v1/models',
+                           timeout=urllib3.Timeout(connect=2.0, read=5.0))
+                xbmc.log("[CONNECTION_POOL] Pre-warmed connection pool", xbmc.LOGDEBUG)
+            except Exception as e:
+                xbmc.log(f"[CONNECTION_POOL] Failed to pre-warm connection pool: {str(e)}", xbmc.LOGDEBUG)
+            
             return pool
         except Exception as e:
             xbmc.log(f"[CONNECTION_POOL] Failed to create pool: {str(e)}", xbmc.LOGERROR)
